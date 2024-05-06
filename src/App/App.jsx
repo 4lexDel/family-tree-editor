@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import FamilyPage from '../../pages/FamilyPage';
+import FamilyPage from '../pages/FamilyPage';
 import './app.css';
-import Header from '../Header/Header';
-import ImportPage from '../../pages/ImportPage';
-import HomePage from '../../pages/HomePage';
+import Header from '../shared/components/Header/Header';
+import ImportPage from '../pages/ImportPage';
+import HomePage from '../pages/HomePage';
 
 const App = () => (
   <div className='app'>
