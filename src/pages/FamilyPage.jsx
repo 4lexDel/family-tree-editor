@@ -65,26 +65,26 @@ const FamilyPage = () => {
         wife: 21,
         children: [17]
       },
-      // {
-      //   husband: 22,
-      //   wife: 23,
-      //   children: [6]
-      // },
       {
-        husband: 24,
-        wife: 25,
-        children: [7]
+        husband: 22,
+        wife: 23,
+        children: [6]
       },
+      // {
+      //   husband: 24,
+      //   wife: 25,
+      //   children: [7]
+      // },
       {
         husband: 26,
         wife: 27,
         children: [8]
       },
-      // {
-      //   husband: 28,
-      //   wife: 29,
-      //   children: [9]
-      // }
+      {
+        husband: 28,
+        wife: 29,
+        children: [9]
+      }
     ]
   }
 

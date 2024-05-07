@@ -20,7 +20,7 @@ const FamilyTree = ({ data }) => {
 
     // Margin
     const MARGIN_PARENT_X = 30;
-    const MARGIN_X = 50;
+    const MARGIN_X = 30;
     const MARGIN_Y = 75;
 
     const LEFT = "LEFT";
@@ -88,6 +88,7 @@ const FamilyTree = ({ data }) => {
 
         // Peuplement des coordonnées de l'objet "data" => création de l'abre
         calculateCoordsData(family);
+        centerIndividuals(data.individuals.find((i) => i.name === "Amaury DELORME"));
 
         // Center family tree
         centerFamilyTree();
@@ -112,8 +113,9 @@ const FamilyTree = ({ data }) => {
             child.y = 0;
         }
 
-        calculateIndividualCoords(lastFamily.husband, (childrenSize / 2) - MARGIN_PARENT_X/2 - INDIVIDUAL_WIDTH / 2, -MARGIN_Y - INDIVIDUAL_HEIGHT, LEFT);
-        calculateIndividualCoords(lastFamily.wife, (childrenSize / 2) + MARGIN_PARENT_X/2 - INDIVIDUAL_WIDTH / 2, -MARGIN_Y - INDIVIDUAL_HEIGHT, RIGHT);
+        calculateIndividualCoords(lastFamily.husband, (childrenSize / 2) - MARGIN_PARENT_X/2 - INDIVIDUAL_WIDTH, -MARGIN_Y - INDIVIDUAL_HEIGHT, LEFT);
+        let husband = getIndividualById(lastFamily.husband);
+        calculateIndividualCoords(lastFamily.wife, husband.x + INDIVIDUAL_WIDTH + MARGIN_PARENT_X, -MARGIN_Y - INDIVIDUAL_HEIGHT, RIGHT);
     }
 
     /**
@@ -131,14 +133,27 @@ const FamilyTree = ({ data }) => {
         individual.x = cursorX;
         individual.y = cursorY;
 
+        // cursorX += INDIVIDUAL_WIDTH/2;
         for (let i = 0; i < data.individuals.length; i++) {
-            const secondIndividual = data.individuals[i];
+            let secondIndividual = data.individuals[i];
             if(secondIndividual.id === individual.id) continue;
             if(isCollision(individual, secondIndividual)){
-                console.log(isCollision(individual, secondIndividual));
+                console.log("START COLLISION LOG");
+                let secondIndividualPartner = getPartner(secondIndividual);
+                if(isCollision(individual, secondIndividualPartner)){
+                    console.log("OTHER");
+                    // On prend celui à l'extremum
+                    if(secondIndividualPartner.x > secondIndividual.x && direction === LEFT){
+                        secondIndividual = secondIndividualPartner;
+                    }
+                    else if(secondIndividualPartner.x < secondIndividual.x && direction === RIGHT){
+                        secondIndividual = secondIndividualPartner;
+                    }
+                }
+
                 console.log(individual);
                 console.log(secondIndividual);
-                let dx = (direction === LEFT ? 1 : -1) * (INDIVIDUAL_WIDTH + MARGIN_X);
+                let dx = (direction === LEFT ? 1 : -1) * (secondIndividual.x - individual.x + INDIVIDUAL_WIDTH + MARGIN_X);
                 console.log(direction);
                 console.log(dx);
 
@@ -150,23 +165,121 @@ const FamilyTree = ({ data }) => {
                 // individualsToMove = individualsToMove.flatMap(i => i);
     
                 moveIndividuals(individualsToMove, dx);
-                moveIndividuals(getAllChildren(individual), dx/2);            
+
+                // Check if the children are left or right
+                let directChild = getChildren(individual)[0];
+                let directChildPartner = getPartner(directChild);
+
+                // Left ?
+                if(false)
+                if(directChild.x < directChildPartner.x){
+                    console.log("LEFT CHILD");
+                    console.log(directChild);
+                    // Move child and the partner and their children
+                    // Grandchildren (with partners) move the half distance to keep the center
+                    let children = getChildren(directChild);
+                    moveIndividuals([directChild, directChildPartner, ...children], dx);
+
+                    let grandChildren = getAllChildrenWithPartner(children[0]);
+                    moveIndividuals([grandChildren, children], dx/2);
+                }
+                else{
+                    console.log("RIGHT CHILD");
+                    console.log(directChild);
+                    // Move the child
+                    // Children and grandchildren (with partners) move the half distance to keep the center
+                    moveIndividuals([directChild], dx);
+                    let children = getChildren(directChild);
+                    moveIndividuals(children, dx/2);
+
+                    let grandChildren = getAllChildrenWithPartner(children[0]);
+                    console.log(grandChildren);
+                    moveIndividuals(grandChildren, dx/2);
+                }
+                // console.log("Child move");
+                // console.log(getChildren(individual));
+                // console.log("Grand child move");
+                moveIndividuals(getChildren(individual), dx); 
+                //centerIndividuals(individual);
+                
+                getChildren(individual).forEach(child => {
+                    if(child.x !== undefined && child.y !== undefined){
+                        console.log(getAllChildrenWithPartner(child));
+                        console.log(dx/2);
+                        // moveIndividuals(getAllChildrenWithPartner(child).flatMap((i) => i), dx/2); 
+                        moveIndividuals(getAllChildren(child), dx/2); 
+                        // moveIndividuals(getChildren(getChildren(child)[0]), dx/4); 
+                        
+                        // getChildren(child).forEach(grandChild => {
+                        //     moveIndividuals(getAllChildren(grandChild), -dx/4); 
+                        // });
+                        //centerIndividuals(child);
+                    }
+                });
+                // centerIndividuals(individual);
+
+                // moveIndividuals(getChildren(individual), dx); 
+                // moveIndividuals(getChildren(getChildren(individual)[0]), dx/2); 
+                // moveIndividuals(getChildren(getChildren(getChildren(individual)[0])[0]), dx/4); 
+                
+                cursorX += dx;
+                console.log("END COLLISION LOG");
+                break;
             }
         }
 
         if (!family) return;
 
-        calculateIndividualCoords(family.husband, cursorX - MARGIN_PARENT_X/2, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, LEFT);
-        calculateIndividualCoords(family.wife, cursorX + MARGIN_PARENT_X/2, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, RIGHT);
+        calculateIndividualCoords(family.husband, cursorX - MARGIN_PARENT_X/2 - INDIVIDUAL_WIDTH/2, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, LEFT);
+        // calculateIndividualCoords(family.wife, cursorX + MARGIN_PARENT_X/2, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, RIGHT);
+        let husband = getIndividualById(family.husband);
+        calculateIndividualCoords(family.wife, husband.x + INDIVIDUAL_WIDTH + MARGIN_PARENT_X, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, RIGHT);
     }
 
-    const isCollision = (individual1, individual2) => {
-        if(individual1.x === undefined || individual1.y === undefined || individual2.x === undefined || individual2.y === undefined) return false;
+    const centerIndividuals = (individual) => {
+        const family = data.families.find((f) => f.husband === individual.id || f.wife === individual.id);
+        if(!family) return;
+        const husband = getIndividualById(family.husband);
+        const wife = getIndividualById(family.wife);
+
+        if(husband.x === undefined || husband.y === undefined || wife.x === undefined || wife.y === undefined) return;
+
+        const middleX = ((husband.x + wife.x)/2) + 0*(INDIVIDUAL_WIDTH/2);
+
+        const children = family.children.map((c) => getIndividualById(c));
+        console.log(children);
+
+        for (let j = 0; j < children.length; j++) {
+            const child = children[j];
+            if(child.x !== undefined && child.y !== undefined){
+                child.x = middleX;
+                centerIndividuals(child);
+            }
+        }
+    }
+
+    const isCollision = (individualInsert, individual2) => {
+        if(individualInsert.x === undefined || individualInsert.y === undefined || individual2.x === undefined || individual2.y === undefined) return false;
     
-        return (individual1.x + INDIVIDUAL_WIDTH >= individual2.x && 
-                individual1.x <= individual2.x + INDIVIDUAL_WIDTH &&
-                individual1.y + INDIVIDUAL_HEIGHT >= individual2.y && 
-                individual1.y <= individual2.y + INDIVIDUAL_HEIGHT);
+        let individual2Partner = getPartner(individual2);
+        if(individual2Partner && individual2Partner.x !== undefined && individual2Partner.y !== undefined){
+            let minX = Math.min(individual2Partner.x, individual2.x);
+            let maxX = Math.max(individual2Partner.x, individual2.x) + INDIVIDUAL_WIDTH;
+            let minY = Math.min(individual2Partner.y, individual2.y);
+            let maxY = Math.max(individual2Partner.y, individual2.y) + INDIVIDUAL_HEIGHT;
+
+            if(individualInsert.x + INDIVIDUAL_WIDTH >= minX.x && 
+                individualInsert.x <= maxX &&
+                individualInsert.y + INDIVIDUAL_HEIGHT >= minY && 
+                individualInsert.y <= maxY) return true;
+        }
+
+        if(individualInsert.x + INDIVIDUAL_WIDTH >= individual2.x && 
+                individualInsert.x <= individual2.x + INDIVIDUAL_WIDTH &&
+                individualInsert.y + INDIVIDUAL_HEIGHT >= individual2.y && 
+                individualInsert.y <= individual2.y + INDIVIDUAL_HEIGHT) return true;
+        
+        return false;
     }
 
     /**
@@ -257,6 +370,58 @@ const FamilyTree = ({ data }) => {
         return childrenStored;
     }
 
+    const getAllChildrenWithPartner = (individual, childrenStored=[]) => {
+        let family = data.families.find((family) => family.husband === individual.id || family.wife === individual.id);
+        if(!family) return childrenStored;
+
+        family.children.forEach(childId => {
+            let child = getIndividualById(childId);
+            if(child && child.x !== undefined && child.y !== undefined){
+                childrenStored.push(child);
+                let childPartner = getPartner(child);
+                childPartner && childrenStored.push(childPartner);
+                // childPartner && childrenStored.push(getAllParents(childPartner));
+                getAllChildren(child, childrenStored);
+            }
+        });
+
+        return childrenStored;
+    }
+
+    const getChildren = (individual) => {
+        let family = data.families.find((family) => family.husband === individual.id || family.wife === individual.id);
+        if(!family) return null; 
+        
+        let children = [];
+
+        family.children.forEach(childId => {
+            let child = getIndividualById(childId);
+            if(child && child.x !== undefined && child.y !== undefined){
+                children.push(child);
+            }
+        });
+
+        return children;
+    }
+
+    const getChildrenWithPartner = (individual) => {
+        let family = data.families.find((family) => family.husband === individual.id || family.wife === individual.id);
+        if(!family) return null; 
+        
+        let children = [];
+
+        family.children.forEach(childId => {
+            let child = getIndividualById(childId);
+            if(child && child.x !== undefined && child.y !== undefined){
+                children.push(child);
+                let childPartner = getPartner(child);
+                childPartner && children.push(childPartner);
+            }
+        });
+
+        return children;
+    }
+
     const getAllParents = (individual, parentsStore=[]) => {
         let family = data.families.find((family) => family.children.find((childId) => childId === individual.id));
         if(!family) return parentsStore;
@@ -273,6 +438,7 @@ const FamilyTree = ({ data }) => {
     }
 
     const moveIndividuals = (individuals, dx) => {
+        if(!individuals) return;
         for (let i = 0; i < individuals.length; i++) {
             const individual = individuals[i];
             if(individual.x !== undefined && individual.y !== undefined) individual.x += dx;
