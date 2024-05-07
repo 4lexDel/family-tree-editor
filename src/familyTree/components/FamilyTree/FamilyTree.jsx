@@ -23,8 +23,8 @@ const FamilyTree = ({ data }) => {
     const MARGIN_X = 50;
     const MARGIN_Y = 75;
 
-    // D (Demi distance du haut d'un arbre complet)
-    let d = null;
+    const LEFT = "LEFT";
+    const RIGHT = "RIGHT";
 
     const findLastFamily = () => {
         let lastFamilies = [];
@@ -86,38 +86,13 @@ const FamilyTree = ({ data }) => {
         // Get last family and get the last level
         let { family, level } = findLastFamily();
 
-        // calcul de D (Demi distance du haut d'un arbre complet)
-        let levelPow = Math.pow(2, level - 1);
-        d = levelPow * INDIVIDUAL_WIDTH
-            + (levelPow / 2) * MARGIN_PARENT_X
-            + ((levelPow / 2) - 1) * MARGIN_X
-            + MARGIN_X / 2;
-
-        // Peuplement des coordonnées de l'objet "data" => création de l'abre complet
+        // Peuplement des coordonnées de l'objet "data" => création de l'abre
         calculateCoordsData(family);
 
         // Center family tree
         centerFamilyTree();
-
-        // Remove empty space
-            // Ce système se base sur un décalage régis par les individus orphelins
-            //===> Un système basé uniquement par des calculs de coordonnées serait plus adéquats...
-                // Checker un intervale vide (minimum) d'individus (depuis une couche jusqu'au dessus)
-                    // Selon la taille de l'interval, on se décale plus ou moins
-                    // On se décale arbitrairement de la gauche vers la droite en bougeant uniquement le coté gauche (get parents et get enfants fonctionnnent)  (Ou bien du coté ou l'interval est le plus proche)    
-                    // TECHNIQUE : 
-                        // On itère sur chaque individu
-                        // On regarde devant si y'a un "obstacle"
-                        // Si c'est un enfant on continue
-                        // Si c'est un parent alors on regarde la distance parcouru
-                            // Plus grand que le minimum ?
-                                // Oui ? ==> Décalage !
-                                // non ? ==> Individu suivant !
-                        // MARCHE PAS A RETRAVAILLER 
-        removeEmptySpace();
-
-        // Center family tree
-        centerFamilyTree();
+    
+        // removeEmptySpace();
 
         // Affichage
         setIsLoading(true);
@@ -137,35 +112,61 @@ const FamilyTree = ({ data }) => {
             child.y = 0;
         }
 
-        // calculate node "decalage"
-        let d1 = d / 2;
-
-        calculateIndividualCoords(lastFamily.husband, 2, (childrenSize / 2) - d1 - INDIVIDUAL_WIDTH / 2, -MARGIN_Y - INDIVIDUAL_HEIGHT);
-        calculateIndividualCoords(lastFamily.wife, 2, (childrenSize / 2) + d1 - INDIVIDUAL_WIDTH / 2, -MARGIN_Y - INDIVIDUAL_HEIGHT);
+        calculateIndividualCoords(lastFamily.husband, (childrenSize / 2) - MARGIN_PARENT_X/2 - INDIVIDUAL_WIDTH / 2, -MARGIN_Y - INDIVIDUAL_HEIGHT, LEFT);
+        calculateIndividualCoords(lastFamily.wife, (childrenSize / 2) + MARGIN_PARENT_X/2 - INDIVIDUAL_WIDTH / 2, -MARGIN_Y - INDIVIDUAL_HEIGHT, RIGHT);
     }
 
     /**
      * Update the prop "data" used by the SVG render functions
      * @param {number} individualId 
-     * @param {number} currentLevel 
      * @param {number} cursorX 
      * @param {number} cursorY 
+     * @param {string} direction 
      */
-    const calculateIndividualCoords = (individualId, currentLevel, cursorX, cursorY) => {
-        const individual = data.individuals.find((i) => i.id === individualId);
+    const calculateIndividualCoords = (individualId, cursorX, cursorY, direction) => {
+        const individual = getIndividualById(individualId);
         const family = data.families.find((f) => f.children.find((c) => c === individualId));
 
         // Coords set
         individual.x = cursorX;
         individual.y = cursorY;
 
+        for (let i = 0; i < data.individuals.length; i++) {
+            const secondIndividual = data.individuals[i];
+            if(secondIndividual.id === individual.id) continue;
+            if(isCollision(individual, secondIndividual)){
+                console.log(isCollision(individual, secondIndividual));
+                console.log(individual);
+                console.log(secondIndividual);
+                let dx = (direction === LEFT ? 1 : -1) * (INDIVIDUAL_WIDTH + MARGIN_X);
+                console.log(direction);
+                console.log(dx);
+
+                let individualsToMove = [];
+
+                individualsToMove.push(individual);
+                individualsToMove.push(getPartner(individual));
+                // individualsToMove.push(getAllChildren(individual));
+                // individualsToMove = individualsToMove.flatMap(i => i);
+    
+                moveIndividuals(individualsToMove, dx);
+                moveIndividuals(getAllChildren(individual), dx/2);            
+            }
+        }
+
         if (!family) return;
 
-        // calculate node "decalage"
-        let di = d / (Math.pow(2, currentLevel));
+        calculateIndividualCoords(family.husband, cursorX - MARGIN_PARENT_X/2, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, LEFT);
+        calculateIndividualCoords(family.wife, cursorX + MARGIN_PARENT_X/2, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, RIGHT);
+    }
 
-        calculateIndividualCoords(family.husband, currentLevel + 1, cursorX - di, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT);
-        calculateIndividualCoords(family.wife, currentLevel + 1, cursorX + di, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT);
+    const isCollision = (individual1, individual2) => {
+        if(individual1.x === undefined || individual1.y === undefined || individual2.x === undefined || individual2.y === undefined) return false;
+    
+        return (individual1.x + INDIVIDUAL_WIDTH >= individual2.x && 
+                individual1.x <= individual2.x + INDIVIDUAL_WIDTH &&
+                individual1.y + INDIVIDUAL_HEIGHT >= individual2.y && 
+                individual1.y <= individual2.y + INDIVIDUAL_HEIGHT);
     }
 
     /**
@@ -192,44 +193,44 @@ const FamilyTree = ({ data }) => {
         }
     }
 
-    const removeEmptySpace = () => {
-        // 1 individualToMove : Get all rendered individuals that dont have parents (except first layer)
-        // 2 Move all the parents and children of an individual from "individualToMove" to the right direction
-        // 3 Remove the individual from "individualToMove"
-        // 4 Repeat step 2 while "individualToMove" is not empty 
+    // const removeEmptySpace = () => {
+    //     // 1 individualToMove : Get all rendered individuals that dont have parents (except first layer)
+    //     // 2 Move all the parents and children of an individual from "individualToMove" to the right direction
+    //     // 3 Remove the individual from "individualToMove"
+    //     // 4 Repeat step 2 while "individualToMove" is not empty 
 
-        let individualsToReduce = getIndividualsToReduce(); 
+    //     let individualsToReduce = getIndividualsToReduce(); 
 
-        for (let i = 0; i < individualsToReduce.length; i++) {
-            const individual = individualsToReduce[i];
-            const individualPartner = getPartner(individual);
-            // console.log(individualPartner);
+    //     for (let i = 0; i < individualsToReduce.length; i++) {
+    //         const individual = individualsToReduce[i];
+    //         const individualPartner = getPartner(individual);
+    //         // console.log(individualPartner);
 
-            // calculate the deltaX to get the minimal DIM (margin parent X)
-            let deltaX = (individual.x - individualPartner.x)/2;
+    //         // calculate the deltaX to get the minimal DIM (margin parent X)
+    //         let deltaX = (individual.x - individualPartner.x)/2;
 
-            let individualsToMove = [];
-            individualsToMove.push(individualPartner);
-            individualsToMove.push(getAllParents(individualPartner));
-            // individualsToMove.push(getAllChildren(individualPartner));
-            individualsToMove = individualsToMove.flatMap(i => i);
-            // console.log(individualsToMove);
+    //         let individualsToMove = [];
+    //         individualsToMove.push(individualPartner);
+    //         individualsToMove.push(getAllParents(individualPartner));
+    //         // individualsToMove.push(getAllChildren(individualPartner));
+    //         individualsToMove = individualsToMove.flatMap(i => i);
+    //         // console.log(individualsToMove);
 
-            moveIndividuals(individualsToMove, deltaX);
-            // moveIndividuals(getAllChildren(individualPartner), deltaX/2);
-            individualsToMove.push(individual);
-            moveIndividuals(individualsToMove, -deltaX/2);
-        }
-    }
+    //         moveIndividuals(individualsToMove, deltaX);
+    //         // moveIndividuals(getAllChildren(individualPartner), deltaX/2);
+    //         individualsToMove.push(individual);
+    //         moveIndividuals(individualsToMove, -deltaX/2);
+    //     }
+    // }
 
-    const getIndividualsToReduce = () => {
-        let individualsToMove = data.individuals.filter((individual) => {
-            let childFound = data.families.find((f) => f.children.find((child) => child === individual.id));
-            return !childFound && individual.x != undefined && individual.y != undefined && individual.y > 1;
-        });
+    // const getIndividualsToReduce = () => {
+    //     let individualsToMove = data.individuals.filter((individual) => {
+    //         let childFound = data.families.find((f) => f.children.find((child) => child === individual.id));
+    //         return !childFound && individual.x !== undefined && individual.y !== undefined && individual.y > 1;
+    //     });
 
-        return individualsToMove;
-    }
+    //     return individualsToMove;
+    // }
 
     const getPartner = (individual) => {
         for (let i = 0; i < data.families.length; i++) {
@@ -274,7 +275,7 @@ const FamilyTree = ({ data }) => {
     const moveIndividuals = (individuals, dx) => {
         for (let i = 0; i < individuals.length; i++) {
             const individual = individuals[i];
-            individual.x += dx;
+            if(individual.x !== undefined && individual.y !== undefined) individual.x += dx;
         }
     }
 
