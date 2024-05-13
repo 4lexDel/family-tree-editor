@@ -29,7 +29,7 @@ const FamilyPage = () => {
       { id: 24, gender: 1, name: "Philippe PAROISSIEN" },
       { id: 25, gender: 2, name: "Jacqueline MARTIN" },
       { id: 26, gender: 1, name: "Jean DELORME" },
-      { id: 27, gender: 2, name: "Marie Jeanne Antoinette AMARDEILH" },
+      { id: 27, gender: 2, name: "Marie Jeanne..." },//Marie Jeanne Antoinette AMARDEILH
       { id: 28, gender: 1, name: "Maurice MERCKELBAGH" },
       { id: 29, gender: 2, name: "Suzanne LE GO" },
     ],
@@ -65,26 +65,26 @@ const FamilyPage = () => {
         wife: 21,
         children: [17]
       },
-      {
-        husband: 22,
-        wife: 23,
-        children: [6]
-      },
       // {
-      //   husband: 24,
-      //   wife: 25,
-      //   children: [7]
+      //   husband: 22,
+      //   wife: 23,
+      //   children: [6]
       // },
+      {
+        husband: 24,
+        wife: 25,
+        children: [7]
+      },
       {
         husband: 26,
         wife: 27,
         children: [8]
       },
-      {
-        husband: 28,
-        wife: 29,
-        children: [9]
-      }
+      // {
+      //   husband: 28,
+      //   wife: 29,
+      //   children: [9]
+      // }
     ]
   }
 
