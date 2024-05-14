@@ -4,22 +4,22 @@ const FamilyPage = () => {
   const data = {
     individuals: [
       { id: 1, gender: 1, name: "Amaury DELORME" },
-      { id: 2, gender: 2, name: "Delphine DELORME" },
+      { id: 2, gender: 2, name: "Delphine DEHELLY" },
       { id: 3, gender: 1, name: "Martin DELORME" },
       { id: 4, gender: 1, name: "Alexandre DELORME" },
       { id: 5, gender: 1, name: "Thomas DELORME" },
       { id: 6, gender: 1, name: "Bertrand DEHELLY" },
-      { id: 7, gender: 2, name: "Martine DEHELLY" },
+      { id: 7, gender: 2, name: "Martine PAROISSIEN" },
       { id: 8, gender: 1, name: "Hubert DELORME" },
-      { id: 9, gender: 2, name: "Solange DELORME" },
+      { id: 9, gender: 2, name: "Solange MERCKELBAGH" },
       { id: 10, gender: 1, name: "Thibault DELORME" },
       { id: 11, gender: 1, name: "Arnaud DELORME" },
       { id: 12, gender: 1, name: "Adrien DEHELLY" },
       { id: 13, gender: 1, name: "Nicolas DEHELLY" },
       { id: 14, gender: 1, name: "Thibault DEHELLY" },
       { id: 15, gender: 2, name: "Laure-Anne DEHELLY" },
-      { id: 16, gender: 1, name: "Roxanne DEHELLY" },
-      { id: 17, gender: 2, name: "Lucille DELORME" },
+      { id: 16, gender: 1, name: "Roxane DEHELLY" },
+      { id: 17, gender: 2, name: "Lucille ASTOLFI" },
       { id: 18, gender: 1, name: "Sacha DELORME" },
       { id: 19, gender: 2, name: "Noemie DELORME" },
       { id: 20, gender: 1, name: "Damien ASTOLFI" },
@@ -29,9 +29,13 @@ const FamilyPage = () => {
       { id: 24, gender: 1, name: "Philippe PAROISSIEN" },
       { id: 25, gender: 2, name: "Jacqueline MARTIN" },
       { id: 26, gender: 1, name: "Jean DELORME" },
-      { id: 27, gender: 2, name: "Marie Jeanne..." },//Marie Jeanne Antoinette AMARDEILH
+      { id: 27, gender: 2, name: "Marie Jeanne Antoinette AMARDEILH" },
       { id: 28, gender: 1, name: "Maurice MERCKELBAGH" },
       { id: 29, gender: 2, name: "Suzanne LE GO" },
+      { id: 30, gender: 1, name: "Felix ASTOLFI" },
+      { id: 31, gender: 2, name: "Marie Jacqueline BERNARDI" },
+      { id: 32, gender: 1, name: "Pascal MANSON" },
+      { id: 33, gender: 2, name: "Josiane MOULINET" },
     ],
 
     families: [
@@ -65,11 +69,11 @@ const FamilyPage = () => {
         wife: 21,
         children: [17]
       },
-      // {
-      //   husband: 22,
-      //   wife: 23,
-      //   children: [6]
-      // },
+      {
+        husband: 22,
+        wife: 23,
+        children: [6]
+      },
       {
         husband: 24,
         wife: 25,
@@ -80,11 +84,21 @@ const FamilyPage = () => {
         wife: 27,
         children: [8]
       },
-      // {
-      //   husband: 28,
-      //   wife: 29,
-      //   children: [9]
-      // }
+      {
+        husband: 28,
+        wife: 29,
+        children: [9]
+      },
+      {
+        husband: 30,
+        wife: 31,
+        children: [20]
+      },
+      {
+        husband: 32,
+        wife: 33,
+        children: [21]
+      }
     ]
   }
 
