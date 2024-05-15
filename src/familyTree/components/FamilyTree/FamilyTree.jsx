@@ -3,6 +3,7 @@ import './familyTree.css';
 import Individual from '../Individual/Individual';
 import FamilyConnector from '../FamilyConnector/FamilyConnector';
 import ChildConnector from '../ChildConnector/ChildConnector';
+import ContextMenu from '../../../shared/components/ContextMenu/ContextMenu';
 
 /**
  * Family Tree component
@@ -281,8 +282,8 @@ const FamilyTree = ({ data }) => {
             if (ind.y && ind.y > currentMaxY) currentMaxY = ind.y;
         });
 
-        setMaxX(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN/2);
-        setMaxY(currentMaxY + INDIVIDUAL_HEIGHT + GLOBAL_MARGIN/2);
+        setMaxX(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2);
+        setMaxY(currentMaxY + INDIVIDUAL_HEIGHT + GLOBAL_MARGIN / 2);
     }
 
     const getPartner = (individual) => {
@@ -340,8 +341,7 @@ const FamilyTree = ({ data }) => {
         resetIndividualsCoords();
         buildFamilyTree();
         console.log(data.individuals);
-
-    }, []);
+    }, [data]);
 
     const resetIndividualsCoords = () => {
         data.individuals.forEach((ind) => {
@@ -350,10 +350,29 @@ const FamilyTree = ({ data }) => {
         });
     }
 
+    const [contextMenu, setContextMenu] = useState(null);
+
     const getIndividualById = (id) => data.individuals.find((ind) => ind.id === id);
 
+    const handleContextMenu = (event) => {
+        event.preventDefault();
+        setContextMenu({
+            x: event.clientX,
+            y: event.clientY,
+            options: [
+                { label: 'Option 1', onClick: () => alert('Option 1 clicked') },
+                { label: 'Option 2', onClick: () => alert('Option 2 clicked') },
+                { label: 'Option 3', onClick: () => alert('Option 3 clicked') },
+            ],
+        });
+    };
+
+    const handleCloseContextMenu = () => {
+        setContextMenu(null);
+    };
+
     return (
-        <div className='family-tree'>
+        <div className='family-tree' onContextMenu={handleContextMenu} onClick={handleCloseContextMenu}>
             {/* <p>Max X : {maxX}</p>
             <p>Max Y : {maxY}</p> */}
 
@@ -395,6 +414,14 @@ const FamilyTree = ({ data }) => {
                     ))
                 )}
             </svg>
+            {contextMenu && (
+                <ContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    options={contextMenu.options}
+                    onClose={handleCloseContextMenu}
+                />
+            )}
         </div>
     )
 }

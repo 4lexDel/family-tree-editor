@@ -1,4 +1,6 @@
+import { useState } from "react";
 import FamilyTree from "../familyTree/components/FamilyTree/FamilyTree";
+import ContextMenu from "../shared/components/ContextMenu/ContextMenu";
 
 const FamilyPage = () => {
   const data = {
