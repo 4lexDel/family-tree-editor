@@ -350,33 +350,79 @@ const FamilyTree = ({ data }) => {
         });
     }
 
-    const [contextMenu, setContextMenu] = useState(null);
-
     const getIndividualById = (id) => data.individuals.find((ind) => ind.id === id);
 
+    const getIndividualByCoords = (x, y) => {
+        // x += GLOBAL_MARGIN; 
+        // y += GLOBAL_MARGIN; 
+
+        for (let i = 0; i < data.individuals.length; i++) {
+            const individual = data.individuals[i];
+            
+            if(isCoordDefined(individual) && x > individual.x && x < individual.x + INDIVIDUAL_WIDTH && y > individual.y && y < individual.y + INDIVIDUAL_HEIGHT){
+                return individual;
+            }
+        }
+
+        return null;
+    } 
+    
+    const [contextMenu, setContextMenu] = useState(null);
+    
     const handleContextMenu = (event) => {
         event.preventDefault();
+        setContextMenu(null);
+
+        const svg = event.currentTarget;
+        const point = getTransformedSvgCoordinates(svg, event.clientX, event.clientY);
+
+        const individualSelected = getIndividualByCoords(point.x+GLOBAL_MARGIN/2, point.y+GLOBAL_MARGIN/2);
+
+        if(!individualSelected) return;
+
         setContextMenu({
             x: event.clientX,
             y: event.clientY,
             options: [
-                { label: 'Option 1', onClick: () => alert('Option 1 clicked') },
-                { label: 'Option 2', onClick: () => alert('Option 2 clicked') },
-                { label: 'Option 3', onClick: () => alert('Option 3 clicked') },
+                { label: 'Add partner', onClick: () => alert('ADD PARTNER clicked') },
+                { label: 'Add child', onClick: () => alert('ADD CHILD clicked') },
+                { label: 'Edit', onClick: () => alert('EDIT clicked') },
+                { label: 'Delete', onClick: () => alert('DELETE clicked') },
             ],
         });
     };
+
+    const getTransformedSvgCoordinates = (svg, clientX, clientY) => {
+        const rect = svg.getBoundingClientRect();
+        const svgX = clientX - rect.left;
+        const svgY = clientY - rect.top;
+    
+        // Obtenez les dimensions du viewBox
+        const viewBox = svg.viewBox.baseVal;
+        console.log(viewBox);
+        const scaleX = viewBox.width / rect.width;
+        const scaleY = viewBox.height / rect.height;
+    
+        // Convertissez les coordonnées en fonction de la viewBox
+        const svgViewBoxX = svgX * scaleX;
+        const svgViewBoxY = svgY * scaleY;
+    
+        return {
+          x: svgViewBoxX,
+          y: svgViewBoxY,
+        };
+      };
 
     const handleCloseContextMenu = () => {
         setContextMenu(null);
     };
 
     return (
-        <div className='family-tree' onContextMenu={handleContextMenu} onClick={handleCloseContextMenu}>
+        <div className='family-tree'>
             {/* <p>Max X : {maxX}</p>
             <p>Max Y : {maxY}</p> */}
 
-            <svg width={"100%"} height={"100%"} strokeWidth={2} stroke='black' viewBox={`${GLOBAL_MARGIN / 2} ${GLOBAL_MARGIN / 2} ${maxX} ${maxY}`}>
+            <svg onContextMenu={handleContextMenu} onClick={handleCloseContextMenu} width={"100%"} height={"100%"} strokeWidth={2} stroke='black' viewBox={`${GLOBAL_MARGIN / 2} ${GLOBAL_MARGIN / 2} ${maxX} ${maxY}`}>
                 {isLoading && (
                     data.families.flatMap((family, index) => {
                         let result = [];
