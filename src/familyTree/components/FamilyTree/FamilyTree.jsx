@@ -354,7 +354,6 @@ const FamilyTree = ({ data }) => {
 
     return (
         <div className='family-tree'>
-            <h1>Family tree</h1>
             {/* <p>Max X : {maxX}</p>
             <p>Max Y : {maxY}</p> */}
 

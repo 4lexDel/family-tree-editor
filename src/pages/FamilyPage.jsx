@@ -104,6 +104,8 @@ const FamilyPage = () => {
 
   return (
     <div className='family-page page'>
+      <h1 className="text-main">Family tree</h1>
+
       <FamilyTree data={data}></FamilyTree>
     </div>
   );
