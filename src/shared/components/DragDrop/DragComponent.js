@@ -1,17 +1,29 @@
+import FamilyTreeService from "../../../familyTree/services/familyTree.service";
 import { CustomDragDrop } from "./CustomContainer";
 import { useState } from "react";
 
 export default function DragComponent() {
-  const [ownerLicense, setOwnerLicense] = useState([]);
+  const [files, setFiles] = useState([]);
+
+  const familyTreeService = new FamilyTreeService();
 
   function uploadFiles(f) {
-    console.log(f);
-    setOwnerLicense([...ownerLicense, ...f]);
+    setFiles([...files, ...f]);
   }
 
   function deleteFile(indexFile) {
-    const updatedList = ownerLicense.filter((ele, index) => index !== indexFile);
-    setOwnerLicense(updatedList);
+    const updatedList = files.filter((ele, index) => index !== indexFile);
+    setFiles(updatedList);
+  }
+
+  function importFiles() {
+    files.forEach(file => {
+      console.log(file.data);
+      let convertData = familyTreeService.convertGedcomData(file.data);
+      console.log("-------------------");
+      console.log(convertData);
+      console.log("-------------------");
+    });
   }
 
   return (
@@ -22,12 +34,16 @@ export default function DragComponent() {
         </h2>
       </div>
       <CustomDragDrop
-        ownerLicense={ownerLicense}
+        ownerLicense={files}
         onUpload={uploadFiles}
         onDelete={deleteFile}
         count={4}
         formats={["gedcom"]}
       />
+
+      <button onClick={importFiles} className="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-4 py-2 px-4 rounded">
+        Import files
+      </button>
     </div>
   );
 }
