@@ -281,7 +281,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             if (ind.y && ind.y > currentMaxY) currentMaxY = ind.y;
         });
 
-        setMaxX(Math.max(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2, 1100));
+        setMaxX(Math.max(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2, 1200));
         setMaxY(currentMaxY + INDIVIDUAL_HEIGHT + GLOBAL_MARGIN / 2);
     }
 

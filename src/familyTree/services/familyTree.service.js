@@ -167,6 +167,36 @@ class FamilyTreeService {
 
         return { individuals, families };
     }
+
+    createGedcomData(data) {
+        let gedcom = '0 HEAD\n1 SOUR DataConversion\n1 GEDC\n2 VERS 5.5\n1 CHAR UTF-8\n';
+    
+        // Convertir les individus
+        data.individuals.forEach(individual => {
+            const gender = individual.gender === 1 ? 'M' : 'F';
+            gedcom += `0 @I${individual.id}@ INDI\n`;
+            gedcom += `1 NAME ${individual.name.replace(/ /g, ' /')}/\n`;
+            gedcom += `1 SEX ${gender}\n`;
+        });
+    
+        // Convertir les familles
+        data.families.forEach((family, index) => {
+            gedcom += `0 @F${index + 1}@ FAM\n`;
+            if (family.husband) {
+                gedcom += `1 HUSB @I${family.husband}@\n`;
+            }
+            if (family.wife) {
+                gedcom += `1 WIFE @I${family.wife}@\n`;
+            }
+            family.children.forEach(child => {
+                gedcom += `1 CHIL @I${child}@\n`;
+            });
+        });
+    
+        gedcom += '0 TRLR\n';
+    
+        return gedcom;
+    }
 }
 
 export default FamilyTreeService;

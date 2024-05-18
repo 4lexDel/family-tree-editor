@@ -3,6 +3,7 @@ import FamilyTree from "../familyTree/components/FamilyTree/FamilyTree";
 import { useLocation } from "react-router-dom";
 import FamilyTreeService from "../familyTree/services/familyTree.service";
 import FamilyToolBar from "../familyTree/components/FamilyToolBar/FamilyToolBar";
+import Swal from "sweetalert2";
 
 const FamilyPage = () => {
   const location = useLocation();
@@ -32,8 +33,28 @@ const FamilyPage = () => {
     setData(newData);
   }
 
-  const onSaveAction = () => {
-    console.log("SAVE");
+  const onSaveAction = (filename) => {
+    !filename.endsWith('.gedcom') && (filename += ".gedcom");
+
+    let result = familyTreeService.createGedcomData(data);
+
+    downloadFile(result, filename);
+
+    Swal.fire(filename+" saved successfully!", "", "success");
+  }
+
+  const downloadFile = (content, filename) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
   }
 
   return (

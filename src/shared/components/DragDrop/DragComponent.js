@@ -1,11 +1,8 @@
-import FamilyTreeService from "../../../familyTree/services/familyTree.service";
 import { CustomDragDrop } from "./CustomContainer";
 import { useState } from "react";
 
 export default function DragComponent({ onImportClick }) {
   const [files, setFiles] = useState([]);
-
-  const familyTreeService = new FamilyTreeService();
 
   function uploadFiles(f) {
     setFiles([...files, ...f]);
@@ -17,11 +14,7 @@ export default function DragComponent({ onImportClick }) {
   }
 
   function importFiles() {
-    let filesConverted = files.map(file => {
-      return familyTreeService.convertGedcomData(file.data);
-    });
-
-    onImportClick(filesConverted);
+    onImportClick(files);
   }
 
   return (

@@ -1,14 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import DragComponent from "../shared/components/DragDrop/DragComponent";
+import FamilyTreeService from "../familyTree/services/familyTree.service";
 
 const ImportPage = () => {
     const navigate = useNavigate();
 
-    const onImportClick = (files) => {
-        console.log("FILES");
-        console.log(files);
+    const familyTreeService = new FamilyTreeService();
 
-        navigate('/family', { state: {data: files[0]} });
+    const onImportClick = (files) => {  
+        let filesConverted = files.map(file => {
+            return familyTreeService.convertGedcomData(file.data);
+        });
+
+        console.log("FILES");
+        console.log(filesConverted);
+
+        navigate('/family', { state: {data: filesConverted[0]} });
     }
 
     return (

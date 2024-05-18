@@ -1,10 +1,28 @@
 import { AiTwotoneSave } from "react-icons/ai";
 import { AiTwotoneSetting } from "react-icons/ai";
+import Swal from "sweetalert2";
 
 
 const FamilyToolBar = ({ onSaveAction }) => {
-    const onSaveClick = () => {
-        
+    const onSaveClick = async() => {
+        const { value: filename } = await Swal.fire({
+            title: "Do you want to save the changes?",
+            text: "The output is a gedcom file.",
+            input: "text",
+            inputLabel: "Your filename",
+            inputValue: "my-family-tree",
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return "You need to write something!";
+                }
+            },
+            confirmButtonText: "Save",
+          });
+
+        if(filename) {
+            onSaveAction(filename);
+        }
     }
 
     return (
