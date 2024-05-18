@@ -11,7 +11,7 @@ import ContextMenu from '../../../shared/components/ContextMenu/ContextMenu';
  *                 families: [{husband: number, wife: number, children: [number]}]}}} data 
  * @returns rendering
  */
-const FamilyTree = ({ data }) => {
+const FamilyTree = ({ data, onDataUpdated }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [maxX, setMaxX] = useState(100);
     const [maxY, setMaxY] = useState(100);
@@ -144,17 +144,17 @@ const FamilyTree = ({ data }) => {
             if (isCollision(individual, secondIndividual) || (rightMostIndividual && rightMostIndividual.x > individual.x)) {
                 if (!rightMostIndividual) continue;
 
-                console.log("START COLLISION LOG");
-                console.log(individual);
-                console.log(secondIndividual);
-                console.log(rightMostIndividual);
+                // console.log("START COLLISION LOG");
+                // console.log(individual);
+                // console.log(secondIndividual);
+                // console.log(rightMostIndividual);
                 let dx = rightMostIndividual.x - individual.x + INDIVIDUAL_WIDTH + MARGIN_X;
 
                 moveIndividuals([individual], dx);
                 centerIndividualChildren(individual);
 
                 cursorX += dx;
-                console.log("END COLLISION LOG");
+                // console.log("END COLLISION LOG");
                 break;
             }
         }
@@ -187,7 +187,6 @@ const FamilyTree = ({ data }) => {
         if (!family) return;
 
         const children = family.children.map((c) => getIndividualById(c));
-        console.log(children);
 
         for (let j = 0; j < children.length; j++) {
             const child = children[j];
@@ -282,7 +281,7 @@ const FamilyTree = ({ data }) => {
             if (ind.y && ind.y > currentMaxY) currentMaxY = ind.y;
         });
 
-        setMaxX(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2);
+        setMaxX(Math.max(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2, 1100));
         setMaxY(currentMaxY + INDIVIDUAL_HEIGHT + GLOBAL_MARGIN / 2);
     }
 
@@ -337,10 +336,13 @@ const FamilyTree = ({ data }) => {
     const isCoordDefined = (individual) => individual.x !== undefined && individual.y !== undefined;
 
     useEffect(() => {
-        console.log("-------------------------------------");
-        resetIndividualsCoords();
-        buildFamilyTree();
-        console.log(data.individuals);
+        console.log("FAMILY TREE USE EFFECT");
+        // console.log("-------------------------------------");
+        if(data){
+            resetIndividualsCoords();
+            buildFamilyTree();
+        }
+        // console.log(data.individuals);
     }, [data]);
 
     const resetIndividualsCoords = () => {
@@ -399,7 +401,7 @@ const FamilyTree = ({ data }) => {
     
         // Obtenez les dimensions du viewBox
         const viewBox = svg.viewBox.baseVal;
-        console.log(viewBox);
+        // console.log(viewBox);
         const scaleX = viewBox.width / rect.width;
         const scaleY = viewBox.height / rect.height;
     
@@ -418,11 +420,11 @@ const FamilyTree = ({ data }) => {
     };
 
     return (
-        <div className='family-tree'>
+        <div className='family-tree m-0'>
             {/* <p>Max X : {maxX}</p>
             <p>Max Y : {maxY}</p> */}
 
-            <svg onContextMenu={handleContextMenu} onClick={handleCloseContextMenu} width={"100%"} height={"100%"} strokeWidth={2} stroke='black' viewBox={`${GLOBAL_MARGIN / 2} ${GLOBAL_MARGIN / 2} ${maxX} ${maxY}`}>
+            <svg className='svg-drawing' onContextMenu={handleContextMenu} onClick={handleCloseContextMenu} strokeWidth={2} stroke='black' viewBox={`${GLOBAL_MARGIN / 2} ${GLOBAL_MARGIN / 2} ${maxX} ${maxY}`}>
                 {isLoading && (
                     data.families.flatMap((family, index) => {
                         let result = [];
