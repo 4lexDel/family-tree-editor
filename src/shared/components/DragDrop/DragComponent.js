@@ -1,5 +1,8 @@
 import { CustomDragDrop } from "./CustomContainer";
 import { useState } from "react";
+import { Tooltip as ReactTooltip } from "react-tooltip";
+import Swal from "sweetalert2";
+
 
 export default function DragComponent({ onImportClick }) {
   const [files, setFiles] = useState([]);
@@ -14,8 +17,29 @@ export default function DragComponent({ onImportClick }) {
   }
 
   function importFiles() {
-    onImportClick(files);
+    if(!files.length) {
+      Swal.fire("No files imported", "", "warning");
+    }
+    else {
+      onImportClick(files);
+      TopNotification.fire({
+        icon: "success",
+        title: "File(s) imported successfully"
+      });
+    }
   }
+
+  const TopNotification = Swal.mixin({
+    toast: true,
+    position: "bottom-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.addEventListener("mouseenter", Swal.stopTimer);
+      toast.addEventListener("mouseleave", Swal.resumeTimer);
+    }
+  });
 
   return (
     <div className="bg-white shadow rounded-lg px-10 pt-3 pb-5 m-8">
@@ -32,9 +56,18 @@ export default function DragComponent({ onImportClick }) {
         formats={["gedcom"]}
       />
 
-      <button onClick={importFiles} className="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-4 py-2 px-4 rounded">
+      <button 
+        data-tooltip-id="import-tp" 
+        data-tooltip-delay-show="500"
+        onClick={importFiles} 
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-4 py-2 px-4 rounded">
         Import file(s)
       </button>
+      <ReactTooltip
+          id="import-tp"
+          place="top"
+          content="Import the file(s) and visualize the family tree structure"
+      />   
     </div>
   );
 }
