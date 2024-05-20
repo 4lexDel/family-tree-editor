@@ -7,6 +7,7 @@ class FamilyTreeService {
                 { id: 1, gender: 1, name: "Père AAA" },
                 { id: 2, gender: 2, name: "Mère CCC" },
                 { id: 3, gender: 1, name: "Fils AAA" },
+                { id: 4, gender: 2, name: "Fille AAA" },
 
                 { id: 5, gender: 1, name: "Grand-père AAA" },
                 { id: 6, gender: 2, name: "Grand-mère BBB" },
@@ -19,7 +20,7 @@ class FamilyTreeService {
                 {
                     husband: 1,
                     wife: 2,
-                    children: [3]
+                    children: [3, 4]
                 },
                 {
                     husband: 5,

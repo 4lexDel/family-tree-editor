@@ -186,26 +186,53 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         const family = data.families.find((f) => f.husband === individual.id || f.wife === individual.id);
         if (!family) return;
 
+        const husband = getIndividualById(family.husband);
+        const wife = getIndividualById(family.wife);
+
         const children = family.children.map((c) => getIndividualById(c));
+
+        if(!children) return;
+
+        centerChildren(children, husband, wife);
 
         for (let j = 0; j < children.length; j++) {
             const child = children[j];
-            centerIndividual(child);
+            // centerIndividual(child);
             centerIndividualChildren(child);
         }
     }
 
-    const centerIndividual = (individual) => {
-        if (!isCoordDefined(individual)) return;
-        const family = data.families.find((f) => f.children.find((c) => c === individual.id));
-        if (!family) return;
+    const centerChildren = (children, husband, wife) => {
+        // 1) Prepare individuals
+        let individualsToCenter = children.flatMap((child) => {
+            let res = [];
+            if(isCoordDefined(child)) {
+                res.push(child);
+                const partner = getPartner(child);
+                if(partner && isCoordDefined(partner)){
+                    let familyPartner = data.families.find((f) => f.husband === partner.id || f.wife === partner.id);
+                    
+                    let isOneChildrenDisplayed = familyPartner.children.find((c) => isCoordDefined(getIndividualById(c)));
+                    // useless to move a parent if he has children
+                    if(!isOneChildrenDisplayed) res.push(partner);
+                }
+            }
+            return res;
+        });
 
-        const husband = getIndividualById(family.husband);
-        const wife = getIndividualById(family.wife);
+        individualsToCenter = individualsToCenter.sort((childA, childB) => childA.x - childB.x);
+
+        let n = individualsToCenter.length;
+        let distance = individualsToCenter[n-1].x - individualsToCenter[0].x;// + INDIVIDUAL_WIDTH;
+
+        // 2) find the begin cursorX coords
+        // a) get middle
+        // b) move to draw the new coords
+        let cursorX = 0;
 
         if (isCoordDefined(husband) && isCoordDefined(wife)) {
-            let middleX = ((husband.x + wife.x) / 2);// - 1*(INDIVIDUAL_WIDTH);
-            individual.x = middleX;
+            let middleX = ((husband.x + wife.x) / 2)// - 1*(INDIVIDUAL_WIDTH);
+            cursorX = middleX - distance/2;
         }
         else if ((isCoordDefined(husband) && !isCoordDefined(wife)) || (!isCoordDefined(husband) && isCoordDefined(wife))) {
             let uniqueParent = null;
@@ -220,7 +247,16 @@ const FamilyTree = ({ data, onDataUpdated }) => {
                 direction = 1;
             }
 
-            individual.x = uniqueParent.x + direction * ((MARGIN_PARENT_X + INDIVIDUAL_WIDTH) / 2);
+            let middleX = uniqueParent.x + direction * ((MARGIN_PARENT_X + INDIVIDUAL_WIDTH) / 2);
+            cursorX = middleX - distance/2;
+        }
+        else return;
+
+        for (let i = 0; i < individualsToCenter.length; i++) {
+            const individual = individualsToCenter[i];
+            individual.x = cursorX;
+
+            cursorX += INDIVIDUAL_WIDTH + MARGIN_X;
         }
     }
 
@@ -294,36 +330,6 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         return null;
     }
-
-    // const getAllChildren = (individual, childrenStored=[]) => {
-    //     let family = data.families.find((family) => family.husband === individual.id || family.wife === individual.id);
-    //     if(!family) return childrenStored;
-
-    //     family.children.forEach(childId => {
-    //         let child = getIndividualById(childId);
-    //         if(child && isCoordDefined(child)){
-    //             childrenStored.push(child);
-    //             getAllChildren(child, childrenStored);
-    //         }
-    //     });
-
-    //     return childrenStored;
-    // }
-
-    // const getAllParents = (individual, parentsStore=[]) => {
-    //     let family = data.families.find((family) => family.children.find((childId) => childId === individual.id));
-    //     if(!family) return parentsStore;
-
-    //     [family.husband, family.wife].forEach(parentId => {
-    //         let parent = getIndividualById(parentId);
-    //         if(parent && isCoordDefined(parent)){
-    //             parentsStore.push(parent);
-    //             getAllParents(parent, parentsStore);
-    //         }
-    //     });
-
-    //     return parentsStore;
-    // }
 
     const moveIndividuals = (individuals, dx) => {
         if (!individuals) return;
