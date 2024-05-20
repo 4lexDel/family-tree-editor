@@ -131,6 +131,10 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         if (level > GENERATION_LEVEL_LIMITER) return;
         const individual = getIndividualById(individualId);
 
+        //////////////////////////////////////////////////////////////////////////// getSiblings();
+        //////////////////////////////////////////////////////////////////////////// For each getPartners();
+        //////////////////////////////////////////////////////////////////////////// Coords;
+
         // Coords set
         individual.x = cursorX;
         individual.y = cursorY;
@@ -331,6 +335,16 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         return null;
     }
 
+    /**
+     * get brothers/sisters of an individual
+     */
+    const getSiblings = (individual) => {
+        let family = data.families.find((f) => f.children.find((c) => c === individual.id));
+        if(!family) return null;
+
+        return family.children.flatMap((c) => c !== individual.id ? getIndividualById(c) : []);
+    }
+
     const moveIndividuals = (individuals, dx) => {
         if (!individuals) return;
         for (let i = 0; i < individuals.length; i++) {
@@ -347,6 +361,10 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         if(data){
             resetIndividualsCoords();
             buildFamilyTree();
+            // console.log("SIBLINGS OF AMAURY");
+            // // console.log(data.individuals);
+            // // console.log(data.individuals.find((i) => i.name === "Amaury DELORME"));
+            // console.log(getSiblings(data.individuals.find((i) => i.name === "Delphine DEHELLY")));
         }
         // console.log(data.individuals);
     }, [data]);
