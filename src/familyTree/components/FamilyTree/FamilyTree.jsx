@@ -183,7 +183,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         const rightMostIndividual = getTheRightMostIndividual(individual);
 
         if (role === HUSBAND && rightMostIndividual && rightMostIndividual.x + INDIVIDUAL_WIDTH + MARGIN_X > rightMostSibling.x) {
-            let dx = rightMostIndividual.x - rightMostSibling.x + INDIVIDUAL_WIDTH + MARGIN_X;
+            let dx = rightMostIndividual.x + INDIVIDUAL_WIDTH + MARGIN_X - rightMostSibling.x;
 
             moveIndividuals([individual], dx);
 
@@ -199,9 +199,9 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         if(siblingsWithPartners && siblingsWithPartners.length){
             let n = siblingsWithPartners.length;
             siblingsWithPartners = siblingsWithPartners.sort((childA, childB) => childA.x - childB.x);
-            let d = (siblingsWithPartners[n-1].x - siblingsWithPartners[0].x)/2;
+            let d = (INDIVIDUAL_WIDTH + MARGIN_X + (siblingsWithPartners[n-1].x - siblingsWithPartners[0].x))/2;
 
-            cursorX = cursorX + direction * d - 0*(role === WIFE ? INDIVIDUAL_WIDTH/2 : 0);
+            cursorX = cursorX + direction * d;
         }
         
         // Fetch family to get the parents
