@@ -24,7 +24,7 @@ const FamilyConnector = ({ parent1, parent2, width, height, marginY, childConnec
                             <circle fill='grey'
                                 cx={Math.min(parent1.x, parent2.x) + width / 2 + Math.abs(parent1.x - parent2.x) / 2}
                                 cy={parent1.y + height / 2}
-                                r={8}>
+                                r={6}>
                             </circle>
                         </>
                     )}

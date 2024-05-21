@@ -1,0 +1,24 @@
+0 HEAD
+1 SOUR MyGenealogySoftware
+2 NAME MyGenealogySoftware
+3 VERS 1.0
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+0 @I1@ INDI
+1 NAME Alice /Smith/
+1 SEX F
+1 BIRT
+2 DATE 12 JUN 1975
+2 PLAC Town, State, Country
+1 FAMS @F1@
+0 @I2@ INDI
+1 NAME Bob /Smith/
+1 SEX M
+1 BIRT
+2 DATE 20 SEP 2000
+2 PLAC Town, State, Country
+1 FAMC @F1@
+0 @F1@ FAM
+1 WIFE @I1@
+1 CHIL @I2@
