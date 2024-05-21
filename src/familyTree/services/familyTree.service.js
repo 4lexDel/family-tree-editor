@@ -78,6 +78,7 @@ class FamilyTreeService {
                 { id: 40, gender: 1, name: "Jean-Stephane ASTOLFI" },
                 { id: 41, gender: 1, name: "Erwan MANSON" },
                 { id: 42, gender: 1, name: "Joaquim ASTOLFI" },
+                { id: 43, gender: 2, name: "Katell ???????" },
             ],
 
             families: [
@@ -164,6 +165,11 @@ class FamilyTreeService {
                 {
                     husband: 11,
                     wife: 37,
+                    children: []
+                },
+                {
+                    husband: 41,
+                    wife: 43,
                     children: []
                 }
             ]
