@@ -19,7 +19,7 @@ const FamilyPage = () => {
       setData(dataRetrieved);
       localStorage.setItem("family-data", JSON.stringify(dataRetrieved));
     }
-    else if(localStorage.getItem("family-data")){
+    else if(false && localStorage.getItem("family-data")){
       setData(JSON.parse(localStorage.getItem("family-data")));
     }
     else {

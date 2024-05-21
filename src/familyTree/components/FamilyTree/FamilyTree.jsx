@@ -18,7 +18,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
     // Global settings
     // DIM
-    const INDIVIDUAL_WIDTH = 180;
+    const INDIVIDUAL_WIDTH = 150;
     const INDIVIDUAL_HEIGHT = 75;
 
     // Margin
@@ -28,6 +28,9 @@ const FamilyTree = ({ data, onDataUpdated }) => {
     const MARGIN_Y = 80;
 
     const GENERATION_LEVEL_LIMITER = Infinity;
+
+    const HUSBAND = "HUSBAND";
+    const WIFE = "WIFE";
 
     const findLastFamily = () => {
         let lastFamilies = [];
@@ -115,9 +118,9 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             child.y = 0;
         }
 
-        calculateIndividualCoords(lastFamily.husband, (childrenSize / 2) - MARGIN_PARENT_X / 2 - INDIVIDUAL_WIDTH, -MARGIN_Y - INDIVIDUAL_HEIGHT, 1);
+        calculateIndividualCoords(lastFamily.husband, (childrenSize / 2) - MARGIN_PARENT_X / 2 - INDIVIDUAL_WIDTH, -MARGIN_Y - INDIVIDUAL_HEIGHT, 1, HUSBAND);
         let husband = getIndividualById(lastFamily.husband);
-        calculateIndividualCoords(lastFamily.wife, husband.x + INDIVIDUAL_WIDTH + MARGIN_PARENT_X, -MARGIN_Y - INDIVIDUAL_HEIGHT, 1);
+        calculateIndividualCoords(lastFamily.wife, husband.x + INDIVIDUAL_WIDTH + MARGIN_PARENT_X, -MARGIN_Y - INDIVIDUAL_HEIGHT, 1, WIFE);
     }
 
     /**
@@ -127,48 +130,87 @@ const FamilyTree = ({ data, onDataUpdated }) => {
      * @param {number} cursorY 
      * @param {number} level 
      */
-    const calculateIndividualCoords = (individualId, cursorX, cursorY, level) => {
+    const calculateIndividualCoords = (individualId, cursorX, cursorY, level, role) => {
         if (level > GENERATION_LEVEL_LIMITER) return;
         const individual = getIndividualById(individualId);
 
-        //////////////////////////////////////////////////////////////////////////// getSiblings();
-        //////////////////////////////////////////////////////////////////////////// For each getPartners();
-        //////////////////////////////////////////////////////////////////////////// Coords;
+        const siblings = getSiblings(individual);
+        let siblingsWithPartners = null;
+
+        let rightMostSibling = individual;
+
+        let direction = role === HUSBAND ? -1 : 1;
+
+        if(siblings && siblings.length){
+            siblingsWithPartners = siblings.map((sibling) => {
+                return {sibling, partner: getPartner(sibling)};
+            });
+    
+            let n = 1;
+
+            for (let i = 0; i < siblingsWithPartners.length; i++) {
+                const siblingWithPartner = siblingsWithPartners[i];
+
+                let firstIndividual = role === HUSBAND ? siblingWithPartner.partner : siblingWithPartner.sibling;
+                let secondIndividual = role === HUSBAND ? siblingWithPartner.sibling : siblingWithPartner.partner;
+
+                if (firstIndividual) {
+                    firstIndividual.x = cursorX + direction * n * (INDIVIDUAL_WIDTH + MARGIN_X);
+                    firstIndividual.y = cursorY;
+                    n++;
+                }
+                if(secondIndividual){
+                    secondIndividual.x = cursorX + direction * n * (INDIVIDUAL_WIDTH + MARGIN_X);
+                    secondIndividual.y = cursorY;
+                    n++;
+                }
+            }
+            if (role === HUSBAND) {
+                rightMostSibling = siblingsWithPartners[siblingsWithPartners.length - 1].sibling;
+            }
+
+            siblingsWithPartners = siblingsWithPartners.flatMap((sibling) => {
+                let res = [sibling.sibling];
+                if (sibling.partner) res.push(sibling.partner);
+                return res;
+            });
+        }
 
         // Coords set
         individual.x = cursorX;
         individual.y = cursorY;
 
-        for (let i = 0; i < data.individuals.length; i++) {
-            let secondIndividual = data.individuals[i];
-            if (secondIndividual.id === individual.id) continue;
+        const rightMostIndividual = getTheRightMostIndividual(individual);
 
-            const rightMostIndividual = getTheRightMostIndividual(individual);
+        if (role === HUSBAND && rightMostIndividual && rightMostIndividual.x + INDIVIDUAL_WIDTH + MARGIN_X > rightMostSibling.x) {
+            let dx = rightMostIndividual.x - rightMostSibling.x + INDIVIDUAL_WIDTH + MARGIN_X;
 
-            if (isCollision(individual, secondIndividual) || (rightMostIndividual && rightMostIndividual.x > individual.x)) {
-                if (!rightMostIndividual) continue;
+            moveIndividuals([individual], dx);
 
-                // console.log("START COLLISION LOG");
-                // console.log(individual);
-                // console.log(secondIndividual);
-                // console.log(rightMostIndividual);
-                let dx = rightMostIndividual.x - individual.x + INDIVIDUAL_WIDTH + MARGIN_X;
-
-                moveIndividuals([individual], dx);
-                centerIndividualChildren(individual);
-
-                cursorX += dx;
-                // console.log("END COLLISION LOG");
-                break;
+            if(siblingsWithPartners && siblingsWithPartners.length){
+                moveIndividuals(siblingsWithPartners, dx);
             }
+
+            centerIndividualChildren(individual);
+
+            cursorX += dx;
         }
 
+        if(siblingsWithPartners && siblingsWithPartners.length){
+            let n = siblingsWithPartners.length;
+            siblingsWithPartners = siblingsWithPartners.sort((childA, childB) => childA.x - childB.x);
+            let d = (siblingsWithPartners[n-1].x - siblingsWithPartners[0].x)/2;
+
+            cursorX = cursorX + direction * d - 0*(role === WIFE ? INDIVIDUAL_WIDTH/2 : 0);
+        }
+        
+        // Fetch family to get the parents
         const family = data.families.find((f) => f.children.find((c) => c === individualId));
         if (!family) return;
 
-        calculateIndividualCoords(family.husband, cursorX - MARGIN_PARENT_X / 2 - INDIVIDUAL_WIDTH / 2, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, level + 1);
+        calculateIndividualCoords(family.husband, cursorX - MARGIN_PARENT_X / 2 - INDIVIDUAL_WIDTH / 2, cursorY - MARGIN_Y - INDIVIDUAL_HEIGHT, level + 1, HUSBAND);
         let husband = getIndividualById(family.husband);
-        calculateIndividualCoords(family.wife, husband.x + INDIVIDUAL_WIDTH + MARGIN_PARENT_X, husband.y, level + 1);
+        calculateIndividualCoords(family.wife, husband.x + INDIVIDUAL_WIDTH + MARGIN_PARENT_X, husband.y, level + 1, WIFE);
     }
 
     const getTheRightMostIndividual = (individual) => {
@@ -224,6 +266,8 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             return res;
         });
 
+        if(!individualsToCenter.length) return;
+
         individualsToCenter = individualsToCenter.sort((childA, childB) => childA.x - childB.x);
 
         let n = individualsToCenter.length;
@@ -262,30 +306,6 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
             cursorX += INDIVIDUAL_WIDTH + MARGIN_X;
         }
-    }
-
-    const isCollision = (individualInsert, individual2) => {
-        if (!isCoordDefined(individualInsert) || !isCoordDefined(individual2)) return false;
-
-        let individual2Partner = getPartner(individual2);
-        if (individual2Partner && individual2Partner.x !== undefined && individual2Partner.y !== undefined) {
-            let minX = Math.min(individual2Partner.x, individual2.x);
-            let maxX = Math.max(individual2Partner.x, individual2.x) + INDIVIDUAL_WIDTH;
-            let minY = Math.min(individual2Partner.y, individual2.y);
-            let maxY = Math.max(individual2Partner.y, individual2.y) + INDIVIDUAL_HEIGHT;
-
-            if (individualInsert.x + INDIVIDUAL_WIDTH >= minX.x &&
-                individualInsert.x <= maxX &&
-                individualInsert.y + INDIVIDUAL_HEIGHT >= minY &&
-                individualInsert.y <= maxY) return true;
-        }
-
-        if (individualInsert.x + INDIVIDUAL_WIDTH >= individual2.x &&
-            individualInsert.x <= individual2.x + INDIVIDUAL_WIDTH &&
-            individualInsert.y + INDIVIDUAL_HEIGHT >= individual2.y &&
-            individualInsert.y <= individual2.y + INDIVIDUAL_HEIGHT) return true;
-
-        return false;
     }
 
     /**
@@ -460,7 +480,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
                         result.push(<FamilyConnector key={index}
                             parent1={husband}
                             parent2={wife}
-                            childConnector={family.children.length}
+                            childConnector={family.children.find((c) => isCoordDefined(getIndividualById(c)))}
                             width={INDIVIDUAL_WIDTH}
                             height={INDIVIDUAL_HEIGHT}
                             marginY={MARGIN_Y} />);
