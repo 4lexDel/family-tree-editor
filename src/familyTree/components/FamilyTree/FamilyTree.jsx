@@ -23,7 +23,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
     // Margin
     const GLOBAL_MARGIN = 100;
-    const MARGIN_PARENT_X = 20;
+    const MARGIN_PARENT_X = 30;
     const MARGIN_X = 20;
     const MARGIN_Y = 80;
 
@@ -93,7 +93,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         let { family, level } = findLastFamily();
 
         // Peuplement des coordonnées de l'objet "data" => création de l'abre
-        calculateCoordsData(family);
+        calculateIndividualCoords(family.children[0], 0, 0, 0, HUSBAND);
 
         // Center family tree
         centerFamilyTree();
@@ -102,25 +102,6 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         // Affichage
         setIsLoading(true);
-    }
-
-    /**
-     * Init coords children update + call recursive "calculateIndividualCoords" function
-     * @param {{husband: number, wife: number, children: [number]}} lastFamily 
-     */
-    const calculateCoordsData = (lastFamily) => {
-        const children = data.individuals.filter((i) => lastFamily.children.find((child) => child === i.id));
-        const childrenSize = children.length * INDIVIDUAL_WIDTH + (children.length - 1) * MARGIN_X;
-
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i];
-            child.x = i * (INDIVIDUAL_WIDTH + MARGIN_X);
-            child.y = 0;
-        }
-
-        calculateIndividualCoords(lastFamily.husband, (childrenSize / 2) - MARGIN_PARENT_X / 2 - INDIVIDUAL_WIDTH, -MARGIN_Y - INDIVIDUAL_HEIGHT, 1, HUSBAND);
-        let husband = getIndividualById(lastFamily.husband);
-        calculateIndividualCoords(lastFamily.wife, husband.x + INDIVIDUAL_WIDTH + MARGIN_PARENT_X, -MARGIN_Y - INDIVIDUAL_HEIGHT, 1, WIFE);
     }
 
     /**
