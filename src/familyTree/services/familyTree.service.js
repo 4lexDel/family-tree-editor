@@ -106,7 +106,7 @@ class FamilyTreeService {
                 {
                     husband: 4,
                     wife: 17,
-                    children: [18, 19]
+                    children: []
                 },
                 {
                     husband: 20,

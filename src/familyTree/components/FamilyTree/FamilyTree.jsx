@@ -48,25 +48,8 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             }
         }
 
-        let lastFamilies = [];
-
-        for (let i = 0; i < data.families.length; i++) {
-            const currentFamily = data.families[i];
-            const children = currentFamily.children;
-
-            let isOneChildParent = false;
-
-            for (let j = 0; j < data.families.length; j++) {
-                if (i === j) continue;
-                const searchFamily = data.families[j];
-                const parentFound = children.find((child) => searchFamily.husband === child || searchFamily.wife === child);
-                parentFound && (isOneChildParent = true);
-            }
-
-            if (!isOneChildParent) {
-                lastFamilies.push(currentFamily);
-            }
-        }
+        let noParentIndividuals = data.individuals.filter((i) => data.families.find((f) => f.husband === i.id || f.wife === i.id) === undefined);
+        let lastFamilies = data.families.filter((f) => noParentIndividuals.find((i) => f.children.find((c) => c === i.id)));
 
         lastFamilies = lastFamilies.map((family) => {
             return { family, level: getIndividualLevel(family.children[0]) };
@@ -74,6 +57,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         if(startIndividualId !== null){
             const newLastFamilies = lastFamilies.filter((lf) => isIndividualHasAncestor(lf.family.children[0], startIndividualId))
+            // console.log(lastFamilies);
             if(newLastFamilies.length) lastFamilies = newLastFamilies;
         }
 
@@ -123,15 +107,12 @@ const FamilyTree = ({ data, onDataUpdated }) => {
     const buildFamilyTree = (startIndividualId=null) => {
         // Get last family and get the last level
         let { family, level } = findLastFamily(startIndividualId);
-
         console.log(family);
-
         setIsLoading(false);
 
         // Reset previous coords
         resetIndividualsCoords();
 
-        console.log(family.children[0]);
         // Peuplement des coordonnées de l'objet "data" => création de l'abre
         calculateIndividualCoords(family.children[0], 0, 0, 0, HUSBAND);
 
