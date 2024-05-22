@@ -32,7 +32,22 @@ const FamilyTree = ({ data, onDataUpdated }) => {
     const HUSBAND = "HUSBAND";
     const WIFE = "WIFE";
 
-    const findLastFamily = () => {
+    /**
+     * Find the latest family of the family tree
+     * @param {*} individual start from this individual if null it just find the latest
+     * @returns 
+     */
+    const findLastFamily = (startIndividualId=null) => {
+        if(startIndividualId !== null){
+            let startIndividualFamily = data.families.find((f) => f.children.find((c) => c === startIndividualId));
+            
+            let isFamilyParent = data.families.find((f) => f.husband === startIndividualId || f.wife === startIndividualId);
+
+            if(startIndividualFamily && (!isFamilyParent || !isFamilyParent.children.length)){
+                return { family: startIndividualFamily, level: getIndividualLevel(startIndividualId) }; 
+            }
+        }
+
         let lastFamilies = [];
 
         for (let i = 0; i < data.families.length; i++) {
@@ -54,14 +69,30 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         }
 
         lastFamilies = lastFamilies.map((family) => {
-            let child = family.children[0];
-
-            return { family, level: getIndividualLevel(child) };
+            return { family, level: getIndividualLevel(family.children[0]) };
         });
+
+        if(startIndividualId !== null){
+            const newLastFamilies = lastFamilies.filter((lf) => isIndividualHasAncestor(lf.family.children[0], startIndividualId))
+            if(newLastFamilies.length) lastFamilies = newLastFamilies;
+        }
 
         lastFamilies.sort((familyA, familyB) => familyB.level - familyA.level);
 
         return lastFamilies[0];
+    }
+
+    const isIndividualHasAncestor = (individualId, ancestorId) => {
+        let individualFamily = data.families.find((f) => f.children.find((c) => c === individualId));
+
+        if(!individualFamily) return false;
+
+        if(individualFamily.husband === ancestorId || individualFamily.wife === ancestorId) return true;
+        
+        if(isIndividualHasAncestor(individualFamily.husband, ancestorId) || isIndividualHasAncestor(individualFamily.wife, ancestorId)){
+            return true;
+        }
+        return false;
     }
 
     const getIndividualLevel = (individualId) => {
@@ -87,10 +118,16 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
     /**
      * Construct the family tree
+     * @param {*} individual start from this individual if null it just find the latest
      */
-    const buildFamilyTree = () => {
+    const buildFamilyTree = (startIndividualId=null) => {
         // Get last family and get the last level
-        let { family, level } = findLastFamily();
+        let { family, level } = findLastFamily(startIndividualId);
+
+        setIsLoading(false);
+
+        // Reset previous coords
+        resetIndividualsCoords();
 
         // Peuplement des coordonnées de l'objet "data" => création de l'abre
         calculateIndividualCoords(family.children[0], 0, 0, 0, HUSBAND);
@@ -122,11 +159,13 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         let direction = role === HUSBAND ? -1 : 1;
 
-        if(siblings && siblings.length){
+        if (siblings && siblings.length) {
             siblingsWithPartners = siblings.map((sibling) => {
-                return {sibling, partner: getPartner(sibling)};
+                return { sibling, partner: getPartner(sibling) };
             });
-    
+
+            if(level === 0) siblingsWithPartners.push({ sibling: individual, partner: getPartner(individual) });
+
             let n = 1;
 
             for (let i = 0; i < siblingsWithPartners.length; i++) {
@@ -140,7 +179,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
                     firstIndividual.y = cursorY;
                     n++;
                 }
-                if(secondIndividual){
+                if (secondIndividual) {
                     secondIndividual.x = cursorX + direction * n * (INDIVIDUAL_WIDTH + MARGIN_X);
                     secondIndividual.y = cursorY;
                     n++;
@@ -158,17 +197,19 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         }
 
         // Coords set
-        individual.x = cursorX;
-        individual.y = cursorY;
+        if(level > 0){
+            individual.x = cursorX;
+            individual.y = cursorY;
+        }
 
         const rightMostIndividual = getTheRightMostIndividual(individual);
 
-        if (role === HUSBAND && rightMostIndividual && rightMostIndividual.x + INDIVIDUAL_WIDTH + MARGIN_X > rightMostSibling.x) {
+        if (level > 0 && role === HUSBAND && rightMostIndividual && rightMostIndividual.x + INDIVIDUAL_WIDTH + MARGIN_X > rightMostSibling.x) {
             let dx = rightMostIndividual.x + INDIVIDUAL_WIDTH + MARGIN_X - rightMostSibling.x;
 
             moveIndividuals([individual], dx);
 
-            if(siblingsWithPartners && siblingsWithPartners.length){
+            if (siblingsWithPartners && siblingsWithPartners.length) {
                 moveIndividuals(siblingsWithPartners, dx);
             }
 
@@ -177,14 +218,14 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             cursorX += dx;
         }
 
-        if(siblingsWithPartners && siblingsWithPartners.length){
+        if (siblingsWithPartners && siblingsWithPartners.length) {
             let n = siblingsWithPartners.length;
             siblingsWithPartners = siblingsWithPartners.sort((childA, childB) => childA.x - childB.x);
-            let d = (INDIVIDUAL_WIDTH + MARGIN_X + (siblingsWithPartners[n-1].x - siblingsWithPartners[0].x))/2;
+            let d = (INDIVIDUAL_WIDTH + MARGIN_X + (siblingsWithPartners[n - 1].x - siblingsWithPartners[0].x)) / 2;
 
             cursorX = cursorX + direction * d;
         }
-        
+
         // Fetch family to get the parents
         const family = data.families.find((f) => f.children.find((c) => c === individualId));
         if (!family) return;
@@ -218,7 +259,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         const children = family.children.map((c) => getIndividualById(c));
 
-        if(!children) return;
+        if (!children) return;
 
         centerChildren(children, husband, wife);
 
@@ -233,26 +274,26 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         // 1) Prepare individuals
         let individualsToCenter = children.flatMap((child) => {
             let res = [];
-            if(isCoordDefined(child)) {
+            if (isCoordDefined(child)) {
                 res.push(child);
                 const partner = getPartner(child);
-                if(partner && isCoordDefined(partner)){
+                if (partner && isCoordDefined(partner)) {
                     let familyPartner = data.families.find((f) => f.husband === partner.id || f.wife === partner.id);
-                    
+
                     let isOneChildrenDisplayed = familyPartner.children.find((c) => isCoordDefined(getIndividualById(c)));
                     // useless to move a parent if he has children
-                    if(!isOneChildrenDisplayed) res.push(partner);
+                    if (!isOneChildrenDisplayed) res.push(partner);
                 }
             }
             return res;
         });
 
-        if(!individualsToCenter.length) return;
+        if (!individualsToCenter.length) return;
 
         individualsToCenter = individualsToCenter.sort((childA, childB) => childA.x - childB.x);
 
         let n = individualsToCenter.length;
-        let distance = individualsToCenter[n-1].x - individualsToCenter[0].x;// + INDIVIDUAL_WIDTH;
+        let distance = individualsToCenter[n - 1].x - individualsToCenter[0].x;// + INDIVIDUAL_WIDTH;
 
         // 2) find the begin cursorX coords
         // a) get middle
@@ -261,7 +302,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         if (isCoordDefined(husband) && isCoordDefined(wife)) {
             let middleX = ((husband.x + wife.x) / 2)// - 1*(INDIVIDUAL_WIDTH);
-            cursorX = middleX - distance/2;
+            cursorX = middleX - distance / 2;
         }
         else if ((isCoordDefined(husband) && !isCoordDefined(wife)) || (!isCoordDefined(husband) && isCoordDefined(wife))) {
             let uniqueParent = null;
@@ -277,7 +318,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             }
 
             let middleX = uniqueParent.x + direction * ((MARGIN_PARENT_X + INDIVIDUAL_WIDTH) / 2);
-            cursorX = middleX - distance/2;
+            cursorX = middleX - distance / 2;
         }
         else return;
 
@@ -341,7 +382,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
      */
     const getSiblings = (individual) => {
         let family = data.families.find((f) => f.children.find((c) => c === individual.id));
-        if(!family) return null;
+        if (!family) return null;
 
         return family.children.flatMap((c) => c !== individual.id ? getIndividualById(c) : []);
     }
@@ -357,17 +398,10 @@ const FamilyTree = ({ data, onDataUpdated }) => {
     const isCoordDefined = (individual) => individual.x !== undefined && individual.y !== undefined;
 
     useEffect(() => {
-        console.log("FAMILY TREE USE EFFECT");
-        // console.log("-------------------------------------");
-        if(data){
-            resetIndividualsCoords();
+        // console.log("FAMILY TREE USE EFFECT");
+        if (data) {
             buildFamilyTree();
-            // console.log("SIBLINGS OF AMAURY");
-            // // console.log(data.individuals);
-            // // console.log(data.individuals.find((i) => i.name === "Amaury DELORME"));
-            // console.log(getSiblings(data.individuals.find((i) => i.name === "Delphine DEHELLY")));
         }
-        // console.log(data.individuals);
     }, [data]);
 
     const resetIndividualsCoords = () => {
@@ -385,17 +419,17 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         for (let i = 0; i < data.individuals.length; i++) {
             const individual = data.individuals[i];
-            
-            if(isCoordDefined(individual) && x > individual.x && x < individual.x + INDIVIDUAL_WIDTH && y > individual.y && y < individual.y + INDIVIDUAL_HEIGHT){
+
+            if (isCoordDefined(individual) && x > individual.x && x < individual.x + INDIVIDUAL_WIDTH && y > individual.y && y < individual.y + INDIVIDUAL_HEIGHT) {
                 return individual;
             }
         }
 
         return null;
-    } 
-    
+    }
+
     const [contextMenu, setContextMenu] = useState(null);
-    
+
     const handleContextMenu = (event) => {
         event.preventDefault();
         setContextMenu(null);
@@ -403,9 +437,9 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         const svg = event.currentTarget;
         const point = getTransformedSvgCoordinates(svg, event.clientX, event.clientY);
 
-        const individualSelected = getIndividualByCoords(point.x+GLOBAL_MARGIN/2, point.y+GLOBAL_MARGIN/2);
+        const individualSelected = getIndividualByCoords(point.x + GLOBAL_MARGIN / 2, point.y + GLOBAL_MARGIN / 2);
 
-        if(!individualSelected) return;
+        if (!individualSelected) return;
 
         setContextMenu({
             x: event.clientX,
@@ -423,33 +457,41 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         const rect = svg.getBoundingClientRect();
         const svgX = clientX - rect.left;
         const svgY = clientY - rect.top;
-    
+
         // Obtenez les dimensions du viewBox
         const viewBox = svg.viewBox.baseVal;
-        // console.log(viewBox);
         const scaleX = viewBox.width / rect.width;
         const scaleY = viewBox.height / rect.height;
-    
+
         // Convertissez les coordonnées en fonction de la viewBox
         const svgViewBoxX = svgX * scaleX;
         const svgViewBoxY = svgY * scaleY;
-    
-        return {
-          x: svgViewBoxX,
-          y: svgViewBoxY,
-        };
-      };
 
-    const handleCloseContextMenu = () => {
-        setContextMenu(null);
+        return {
+            x: svgViewBoxX,
+            y: svgViewBoxY,
+        };
     };
+
+    const handleClick = (event) => {
+        setContextMenu(null);
+
+        const svg = event.currentTarget;
+        const point = getTransformedSvgCoordinates(svg, event.clientX, event.clientY);
+
+        const individualSelected = getIndividualByCoords(point.x + GLOBAL_MARGIN / 2, point.y + GLOBAL_MARGIN / 2);
+
+        if (!individualSelected) return;
+
+        buildFamilyTree(individualSelected.id);
+    }
 
     return (
         <div className='family-tree m-0'>
             {/* <p>Max X : {maxX}</p>
             <p>Max Y : {maxY}</p> */}
 
-            <svg className='svg-drawing' onContextMenu={handleContextMenu} onClick={handleCloseContextMenu} strokeWidth={2} stroke='black' viewBox={`${GLOBAL_MARGIN / 2} ${GLOBAL_MARGIN / 2} ${maxX} ${maxY}`}>
+            <svg className='svg-drawing' onContextMenu={handleContextMenu} onClick={handleClick} strokeWidth={2} stroke='black' viewBox={`${(GLOBAL_MARGIN / 2)} ${GLOBAL_MARGIN / 2} ${maxX} ${maxY}`}>
                 {isLoading && (
                     data.families.flatMap((family, index) => {
                         let result = [];
@@ -492,7 +534,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
                     x={contextMenu.x}
                     y={contextMenu.y}
                     options={contextMenu.options}
-                    onClose={handleCloseContextMenu}
+                    onClose={() => setContextMenu(null)}
                 />
             )}
         </div>
