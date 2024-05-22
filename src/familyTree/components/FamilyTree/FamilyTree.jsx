@@ -56,9 +56,9 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         });
 
         if(startIndividualId !== null){
-            const newLastFamilies = lastFamilies.filter((lf) => isIndividualHasAncestor(lf.family.children[0], startIndividualId))
+            lastFamilies = lastFamilies.filter((lf) => isIndividualHasAncestor(lf.family.children[0], startIndividualId))
             // console.log(lastFamilies);
-            if(newLastFamilies.length) lastFamilies = newLastFamilies;
+            if(!lastFamilies.length) return null;
         }
 
         lastFamilies.sort((familyA, familyB) => familyB.level - familyA.level);
@@ -106,7 +106,10 @@ const FamilyTree = ({ data, onDataUpdated }) => {
      */
     const buildFamilyTree = async(startIndividualId=null) => {
         // Get last family and get the last level
-        let { family, level } = findLastFamily(startIndividualId);
+        let findLastFamilyResponse = findLastFamily(startIndividualId);
+        if(!findLastFamilyResponse) return;
+
+        let { family, level } = findLastFamilyResponse;
 
         console.log(family);
         // Reset previous coords
