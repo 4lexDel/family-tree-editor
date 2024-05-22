@@ -80,6 +80,20 @@ class FamilyTreeService {
                 { id: 42, gender: 1, name: "Joaquim ASTOLFI" },
                 { id: 43, gender: 2, name: "Katell ???????" },
                 { id: 44, gender: 2, name: "Justine AVENEL" },
+                { id: 45, gender: 2, name: "Clara DEHELLY" },
+                { id: 46, gender: 2, name: "Margaux DEHELLY" },
+                { id: 47, gender: 1, name: "Gabriel DEHELLY" },
+                { id: 48, gender: 2, name: "Joséphine DEHELLY" },
+                { id: 49, gender: 2, name: "Suzanne DEHELLY" },
+                { id: 50, gender: 1, name: "Marceau DEHELLY" },
+                { id: 51, gender: 1, name: "Quentin DELORME" },
+                { id: 52, gender: 2, name: "Aurore DELORME" },
+                { id: 53, gender: 2, name: "Maelis DELORME" },
+                { id: 54, gender: 2, name: "Camille DELORME" },
+                { id: 55, gender: 2, name: "Constance DELORME" },
+                { id: 56, gender: 2, name: "Inès DELORME" },
+                { id: 57, gender: 1, name: "Baptiste DELORME" },
+                { id: 58, gender: 1, name: "Cyprien DELORME" },
             ],
 
             families: [
@@ -146,12 +160,12 @@ class FamilyTreeService {
                 {
                     husband: 13,
                     wife: 34,
-                    children: []
+                    children: [45, 46, 47]
                 },
                 {
                     husband: 14,
                     wife: 35,
-                    children: []
+                    children: [48, 49, 50]
                 },
                 {
                     husband: 38,
@@ -161,12 +175,12 @@ class FamilyTreeService {
                 {
                     husband: 10,
                     wife: 36,
-                    children: []
+                    children: [55, 56, 57, 58]
                 },
                 {
                     husband: 11,
                     wife: 37,
-                    children: []
+                    children: [51, 52, 53, 54]
                 },
                 {
                     husband: 41,

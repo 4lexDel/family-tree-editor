@@ -29,3 +29,14 @@ export default App;
 
 // FEATURES :
 // SORT SIBLINGS
+// Si wife n'a pas de parents alors fondre dans la masse des siblings
+
+// BUGS :
+/**
+ * SWITCH DE FRERE (opposé sur le coté) => pas de changement de visuel
+ * - Render   OK
+ * - Data     OK
+ * - Coords   OK
+ * FIX => pause....
+ */
+

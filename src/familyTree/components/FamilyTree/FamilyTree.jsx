@@ -104,13 +104,17 @@ const FamilyTree = ({ data, onDataUpdated }) => {
      * Construct the family tree
      * @param {*} individual start from this individual if null it just find the latest
      */
-    const buildFamilyTree = (startIndividualId=null) => {
+    const buildFamilyTree = async(startIndividualId=null) => {
         // Get last family and get the last level
         let { family, level } = findLastFamily(startIndividualId);
+
         console.log(family);
+        // Reset previous coords
+
         setIsLoading(false);
 
-        // Reset previous coords
+        await pause(1); //Use to wait the render
+        
         resetIndividualsCoords();
 
         // Peuplement des coordonnées de l'objet "data" => création de l'abre
@@ -123,6 +127,13 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         // Affichage
         setIsLoading(true);
+        console.log(data.individuals);
+    }
+
+    const pause = async(delay) => {
+        return new Promise((res, rej) => setTimeout(() => {
+            res();
+        }, delay))
     }
 
     /**
@@ -467,7 +478,13 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         if (!individualSelected) return;
 
+        console.log(individualSelected);
+
         buildFamilyTree(individualSelected.id);
+    }
+
+    const renderLog = () => {
+        // console.log("TREE RENDERED");
     }
 
     return (
@@ -478,6 +495,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             <svg className='svg-drawing' onContextMenu={handleContextMenu} onClick={handleClick} strokeWidth={2} stroke='black' viewBox={`${(GLOBAL_MARGIN / 2)} ${GLOBAL_MARGIN / 2} ${maxX} ${maxY}`}>
                 {isLoading && (
                     data.families.flatMap((family, index) => {
+                        renderLog();
                         let result = [];
                         let husband = getIndividualById(family.husband);
                         let wife = getIndividualById(family.wife);
