@@ -124,11 +124,14 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         // Get last family and get the last level
         let { family, level } = findLastFamily(startIndividualId);
 
+        console.log(family);
+
         setIsLoading(false);
 
         // Reset previous coords
         resetIndividualsCoords();
 
+        console.log(family.children[0]);
         // Peuplement des coordonnées de l'objet "data" => création de l'abre
         calculateIndividualCoords(family.children[0], 0, 0, 0, HUSBAND);
 
@@ -153,6 +156,8 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         const individual = getIndividualById(individualId);
 
         const siblings = getSiblings(individual);
+        level === 0 && (siblings.push(individual));
+
         let siblingsWithPartners = null;
 
         let rightMostSibling = individual;
@@ -163,8 +168,6 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             siblingsWithPartners = siblings.map((sibling) => {
                 return { sibling, partner: getPartner(sibling) };
             });
-
-            if(level === 0) siblingsWithPartners.push({ sibling: individual, partner: getPartner(individual) });
 
             let n = 1;
 

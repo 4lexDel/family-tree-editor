@@ -51,7 +51,7 @@ class FamilyTreeService {
                 { id: 13, gender: 1, name: "Nicolas DEHELLY" },
                 { id: 14, gender: 1, name: "Thibault DEHELLY" },
                 { id: 15, gender: 2, name: "Laure-Anne WARLIN" },
-                { id: 16, gender: 1, name: "Roxane DEHELLY" },
+                { id: 16, gender: 2, name: "Roxane DEHELLY" },
                 { id: 17, gender: 2, name: "Lucille ASTOLFI" },
                 { id: 18, gender: 1, name: "Sacha DELORME" },
                 { id: 19, gender: 2, name: "Noemie DELORME" },

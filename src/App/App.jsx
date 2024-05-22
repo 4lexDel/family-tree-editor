@@ -27,5 +27,5 @@ export default App;
 
 // https://codesandbox.io/p/sandbox/drag-and-drop-files-react-js-tailwind-72rmp7?file=%2Fsrc%2FApp.js%3A8%2C5
 
-// BUGS :
-// PARTER SKIP DURING LAST GEN
+// FEATURES :
+// SORT SIBLINGS
