@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/family-tree-editor/static/css/main.21549f8f.css",
+    "main.js": "/family-tree-editor/static/js/main.10562541.js",
+    "index.html": "/family-tree-editor/index.html",
+    "main.21549f8f.css.map": "/family-tree-editor/static/css/main.21549f8f.css.map",
+    "main.10562541.js.map": "/family-tree-editor/static/js/main.10562541.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.21549f8f.css",
+    "static/js/main.10562541.js"
+  ]
+}
