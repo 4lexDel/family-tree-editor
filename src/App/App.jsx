@@ -7,7 +7,7 @@ import HomePage from '../pages/HomePage';
 
 const App = () => {
   return (
-    <div className='app'>
+    <>
       <Router>
         <Header></Header>
         <Routes>
@@ -17,7 +17,7 @@ const App = () => {
           <Route path="/family" element={<FamilyPage />}></Route>
         </Routes>
       </Router>
-    </div>
+    </>
   );
 }
 

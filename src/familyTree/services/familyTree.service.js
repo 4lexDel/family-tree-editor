@@ -77,7 +77,7 @@ class FamilyTreeService {
                 { id: 39, gender: 2, name: "Judith ???????" },
                 { id: 40, gender: 1, name: "Jean-Stephane ASTOLFI" },
                 { id: 41, gender: 1, name: "Erwan MANSON" },
-                { id: 42, gender: 1, name: "Joaquim ASTOLFI" },
+                { id: 42, gender: 1, name: "Joachim ASTOLFI" },
                 { id: 43, gender: 2, name: "Katell ???????" },
                 { id: 44, gender: 2, name: "Justine AVENEL" },
                 { id: 45, gender: 2, name: "Clara DEHELLY" },

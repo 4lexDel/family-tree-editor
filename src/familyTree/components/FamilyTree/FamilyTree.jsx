@@ -4,6 +4,7 @@ import Individual from '../Individual/Individual';
 import FamilyConnector from '../FamilyConnector/FamilyConnector';
 import ChildConnector from '../ChildConnector/ChildConnector';
 import ContextMenu from '../../../shared/components/ContextMenu/ContextMenu';
+import SvgResponsiveContainer from '../../../shared/components/SvgResponsiveContainer/SvgResponsiveContainer';
 
 /**
  * Family Tree component
@@ -111,13 +112,11 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         let { family, level } = findLastFamilyResponse;
 
-        console.log(family);
-        // Reset previous coords
-
         setIsLoading(false);
-
+        
         await pause(1); //Use to wait the render
         
+        // Reset previous coords
         resetIndividualsCoords();
 
         // Peuplement des coordonnées de l'objet "data" => création de l'abre
@@ -130,7 +129,6 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
         // Affichage
         setIsLoading(true);
-        console.log(data.individuals);
     }
 
     const pause = async(delay) => {
@@ -361,7 +359,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             if (ind.y && ind.y > currentMaxY) currentMaxY = ind.y;
         });
 
-        setMaxX(Math.max(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2, 1500));
+        setMaxX(Math.max(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2));
         setMaxY(currentMaxY + INDIVIDUAL_HEIGHT + GLOBAL_MARGIN / 2);
     }
 
@@ -428,77 +426,34 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
     const [contextMenu, setContextMenu] = useState(null);
 
-    const handleContextMenu = (event) => {
+    const handleIndividualClick = (event, data, mouseButton) => {
         event.preventDefault();
+
         setContextMenu(null);
 
-        const svg = event.currentTarget;
-        const point = getTransformedSvgCoordinates(svg, event.clientX, event.clientY);
-
-        const individualSelected = getIndividualByCoords(point.x + GLOBAL_MARGIN / 2, point.y + GLOBAL_MARGIN / 2);
-
-        if (!individualSelected) return;
-
-        setContextMenu({
-            x: event.clientX,
-            y: event.clientY,
-            options: [
-                { label: 'Add partner', onClick: () => alert('ADD PARTNER clicked') },
-                { label: 'Add child', onClick: () => alert('ADD CHILD clicked') },
-                { label: 'Edit', onClick: () => alert('EDIT clicked') },
-                { label: 'Delete', onClick: () => alert('DELETE clicked') },
-            ],
-        });
-    };
-
-    const getTransformedSvgCoordinates = (svg, clientX, clientY) => {
-        const rect = svg.getBoundingClientRect();
-        const svgX = clientX - rect.left;
-        const svgY = clientY - rect.top;
-
-        // Obtenez les dimensions du viewBox
-        const viewBox = svg.viewBox.baseVal;
-        const scaleX = viewBox.width / rect.width;
-        const scaleY = viewBox.height / rect.height;
-
-        // Convertissez les coordonnées en fonction de la viewBox
-        const svgViewBoxX = svgX * scaleX;
-        const svgViewBoxY = svgY * scaleY;
-
-        return {
-            x: svgViewBoxX,
-            y: svgViewBoxY,
-        };
-    };
-
-    const handleClick = (event) => {
-        setContextMenu(null);
-
-        const svg = event.currentTarget;
-        const point = getTransformedSvgCoordinates(svg, event.clientX, event.clientY);
-
-        const individualSelected = getIndividualByCoords(point.x + GLOBAL_MARGIN / 2, point.y + GLOBAL_MARGIN / 2);
-
-        if (!individualSelected) return;
-
-        console.log(individualSelected);
-
-        buildFamilyTree(individualSelected.id);
-    }
-
-    const renderLog = () => {
-        // console.log("TREE RENDERED");
+        if(mouseButton === 1) buildFamilyTree(data.id);
+        if(mouseButton === 0) {
+            setContextMenu({
+                x: event.clientX,
+                y: event.clientY,
+                options: [
+                    { label: 'Add partner', onClick: () => alert('ADD PARTNER clicked') },
+                    { label: 'Add child', onClick: () => alert('ADD CHILD clicked') },
+                    { label: 'Edit', onClick: () => alert('EDIT clicked') },
+                    { label: 'Delete', onClick: () => alert('DELETE clicked') },
+                ],
+            });
+        }
     }
 
     return (
-        <div className='family-tree m-0'>
+        <>
             {/* <p>Max X : {maxX}</p>
             <p>Max Y : {maxY}</p> */}
 
-            <svg className='svg-drawing' onContextMenu={handleContextMenu} onClick={handleClick} strokeWidth={2} stroke='black' viewBox={`${(GLOBAL_MARGIN / 2)} ${GLOBAL_MARGIN / 2} ${maxX} ${maxY}`}>
+            <SvgResponsiveContainer handleSvgClick={() => setContextMenu(null)} maxCoordX={maxX} maxCoordY={maxY}>
                 {isLoading && (
                     data.families.flatMap((family, index) => {
-                        renderLog();
                         let result = [];
                         let husband = getIndividualById(family.husband);
                         let wife = getIndividualById(family.wife);
@@ -530,10 +485,16 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
                 {isLoading && (
                     data.individuals.map((ind, index) => (
-                        <Individual key={index} data={ind} width={INDIVIDUAL_WIDTH} height={INDIVIDUAL_HEIGHT} />
+                        <Individual 
+                        key={index} 
+                        data={ind} 
+                        width={INDIVIDUAL_WIDTH} 
+                        height={INDIVIDUAL_HEIGHT} 
+                        handleIndividualClick={handleIndividualClick} 
+                    />
                     ))
                 )}
-            </svg>
+            </SvgResponsiveContainer>
             {contextMenu && (
                 <ContextMenu
                     x={contextMenu.x}
@@ -542,7 +503,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
                     onClose={() => setContextMenu(null)}
                 />
             )}
-        </div>
+        </>
     )
 }
 

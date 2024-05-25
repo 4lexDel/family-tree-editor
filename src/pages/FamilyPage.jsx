@@ -58,12 +58,12 @@ const FamilyPage = () => {
   }
 
   return (
-    <div className='family-page m-0'>
+    <>
       <FamilyToolBar onSaveAction={onSaveAction} />
       <h1 className="text-main">Family tree</h1>
 
       <FamilyTree data={data} onDataUpdated={onDataUpdated}></FamilyTree>
-    </div>
+    </>
   );
 }
 
