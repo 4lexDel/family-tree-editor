@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/family-tree-editor/static/css/main.21549f8f.css",
-    "main.js": "/family-tree-editor/static/js/main.10562541.js",
+    "main.css": "/family-tree-editor/static/css/main.3ce316c4.css",
+    "main.js": "/family-tree-editor/static/js/main.babc52ec.js",
     "index.html": "/family-tree-editor/index.html",
-    "main.21549f8f.css.map": "/family-tree-editor/static/css/main.21549f8f.css.map",
-    "main.10562541.js.map": "/family-tree-editor/static/js/main.10562541.js.map"
+    "main.3ce316c4.css.map": "/family-tree-editor/static/css/main.3ce316c4.css.map",
+    "main.babc52ec.js.map": "/family-tree-editor/static/js/main.babc52ec.js.map"
   },
   "entrypoints": [
-    "static/css/main.21549f8f.css",
-    "static/js/main.10562541.js"
+    "static/css/main.3ce316c4.css",
+    "static/js/main.babc52ec.js"
   ]
 }
