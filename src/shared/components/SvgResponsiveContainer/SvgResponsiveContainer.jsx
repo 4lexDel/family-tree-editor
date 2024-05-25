@@ -30,7 +30,7 @@ const SvgResponsiveContainer = ({ maxCoordX, maxCoordY, children, handleSvgClick
             marginY = 0.05 * svg.clientHeight;
 
             maxSvgX = maxCoordX - startViewBox.width + marginX;
-            maxSvgY = maxCoordY - startViewBox.height + marginY;
+            maxSvgY = maxCoordY*1.2 - startViewBox.height + marginY;
 
             startViewBox.x = Math.max(-marginX, Math.min(maxSvgX, startViewBox.x));
             startViewBox.y = Math.max(-marginY, Math.min(maxSvgY, startViewBox.y));
@@ -72,7 +72,7 @@ const SvgResponsiveContainer = ({ maxCoordX, maxCoordY, children, handleSvgClick
                     const dy = dragCoeff * (y - startY);
 
                     startViewBox.x = Math.max(-0.05 * startViewBox.width, Math.min(maxCoordX - startViewBox.width + 0.05 * startViewBox.width, startViewBox.x - dx * (startViewBox.width / svg.clientWidth)));
-                    startViewBox.y = Math.max(-0.05 * startViewBox.height, Math.min(maxCoordY - startViewBox.height + 0.05 * startViewBox.height, startViewBox.y - dy * (startViewBox.height / svg.clientHeight)));
+                    startViewBox.y = Math.max(-0.05 * startViewBox.height, Math.min(maxCoordY*1000 - startViewBox.height + 0.05 * startViewBox.height, startViewBox.y - dy * (startViewBox.height / svg.clientHeight)));
                 }
                 else{
                     startX = x;

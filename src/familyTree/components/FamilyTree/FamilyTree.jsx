@@ -359,7 +359,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
             if (ind.y && ind.y > currentMaxY) currentMaxY = ind.y;
         });
 
-        setMaxX(Math.max(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2));
+        setMaxX(currentMaxX + INDIVIDUAL_WIDTH + GLOBAL_MARGIN / 2);
         setMaxY(currentMaxY + INDIVIDUAL_HEIGHT + GLOBAL_MARGIN / 2);
     }
 
@@ -397,6 +397,7 @@ const FamilyTree = ({ data, onDataUpdated }) => {
         // console.log("FAMILY TREE USE EFFECT");
         if (data) {
             buildFamilyTree();
+            console.log(data.individuals);
         }
     }, [data]);
 
@@ -408,21 +409,6 @@ const FamilyTree = ({ data, onDataUpdated }) => {
     }
 
     const getIndividualById = (id) => data.individuals.find((ind) => ind.id === id);
-
-    const getIndividualByCoords = (x, y) => {
-        // x += GLOBAL_MARGIN; 
-        // y += GLOBAL_MARGIN; 
-
-        for (let i = 0; i < data.individuals.length; i++) {
-            const individual = data.individuals[i];
-
-            if (isCoordDefined(individual) && x > individual.x && x < individual.x + INDIVIDUAL_WIDTH && y > individual.y && y < individual.y + INDIVIDUAL_HEIGHT) {
-                return individual;
-            }
-        }
-
-        return null;
-    }
 
     const [contextMenu, setContextMenu] = useState(null);
 
@@ -448,8 +434,8 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
     return (
         <>
-            {/* <p>Max X : {maxX}</p>
-            <p>Max Y : {maxY}</p> */}
+            <p>Max X : {maxX}</p>
+            <p>Max Y : {maxY}</p>
 
             <SvgResponsiveContainer handleSvgClick={() => setContextMenu(null)} maxCoordX={maxX} maxCoordY={maxY}>
                 {isLoading && (
