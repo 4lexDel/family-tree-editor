@@ -434,8 +434,8 @@ const FamilyTree = ({ data, onDataUpdated }) => {
 
     return (
         <>
-            <p>Max X : {maxX}</p>
-            <p>Max Y : {maxY}</p>
+            {/* <p>Max X : {maxX}</p>
+            <p>Max Y : {maxY}</p> */}
 
             <SvgResponsiveContainer handleSvgClick={() => setContextMenu(null)} maxCoordX={maxX} maxCoordY={maxY}>
                 {isLoading && (

@@ -5,9 +5,9 @@ import './svgResponsiveContainer.css'
 
 
 const SvgResponsiveContainer = ({ maxCoordX, maxCoordY, children, handleSvgClick }) => {
-    const [zoom, setZoom] = useState(0.4);
+    const [zoom, setZoom] = useState(0.6);
+    const containerRef = useRef(null);
     const svgRef = useRef(null);
-    const viewBox = useRef({ x: 0, y: 0, width: 100, height: 100 });
 
     useEffect(() => {
         // Set focus to SVG element when component mounts
@@ -15,34 +15,6 @@ const SvgResponsiveContainer = ({ maxCoordX, maxCoordY, children, handleSvgClick
           svgRef.current.focus();
         }
       }, []);
-
-    useEffect(() => {
-        const svg = svgRef.current;
-
-        const startViewBox = svg.viewBox.baseVal;
-        let marginX, marginY, maxSvgX, maxSvgY;
-
-        const initSvg = () => {
-            startViewBox.width = svg.clientWidth / zoom;
-            startViewBox.height = svg.clientHeight / zoom;
-
-            marginX = 0.05 * svg.clientWidth;
-            marginY = 0.05 * svg.clientHeight;
-
-            maxSvgX = maxCoordX - startViewBox.width + marginX;
-            maxSvgY = maxCoordY*1.2 - startViewBox.height + marginY;
-
-            startViewBox.x = Math.max(-marginX, Math.min(maxSvgX, startViewBox.x));
-            startViewBox.y = Math.max(-marginY, Math.min(maxSvgY, startViewBox.y));
-        };
-
-        initSvg();
-
-        window.addEventListener('resize', initSvg);
-        return () => {
-            window.removeEventListener('resize', initSvg);
-        };
-    }, [zoom]);
 
     let zoomSensivity = 0.2;
 
@@ -57,7 +29,7 @@ const SvgResponsiveContainer = ({ maxCoordX, maxCoordY, children, handleSvgClick
     const handleDrag = (e) => {
         // e.preventDefault();
         const svg = svgRef.current;
-        const startViewBox = svg.viewBox.baseVal;
+        const container = containerRef.current;
 
         let dragCoeff = 2;
         let draggingCount = -1;
@@ -71,8 +43,8 @@ const SvgResponsiveContainer = ({ maxCoordX, maxCoordY, children, handleSvgClick
                     const dx = dragCoeff * (x - startX);
                     const dy = dragCoeff * (y - startY);
 
-                    startViewBox.x = Math.max(-0.05 * startViewBox.width, Math.min(maxCoordX - startViewBox.width + 0.05 * startViewBox.width, startViewBox.x - dx * (startViewBox.width / svg.clientWidth)));
-                    startViewBox.y = Math.max(-0.05 * startViewBox.height, Math.min(maxCoordY*1000 - startViewBox.height + 0.05 * startViewBox.height, startViewBox.y - dy * (startViewBox.height / svg.clientHeight)));
+                    container.scrollLeft = container.scrollLeft - dx;
+                    container.scrollTop = container.scrollTop - dy;
                 }
                 else{
                     startX = x;
@@ -140,17 +112,19 @@ const SvgResponsiveContainer = ({ maxCoordX, maxCoordY, children, handleSvgClick
                     className="p-1 w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-gray-200 hover:cursor-pointer duration-300 hover:scale-110" 
                 />
             </div>
-            <div className="container">
+            <div ref={containerRef} className="container">
                 <svg    
-                        ref={svgRef}
-                        onClick={handleSvgClick}
-                        onContextMenu={(e) => {e.preventDefault()}}
-                        className='svg-drawing' 
-                        viewBox={`${viewBox.current.x} ${viewBox.current.y} ${viewBox.current.width} ${viewBox.current.height}`}
-                        onMouseDown={handleDrag}
-                        onTouchStart={handleDrag}
-                        strokeWidth={2} stroke='black'
-                        tabIndex={0}>
+                    ref={svgRef}
+                    onClick={handleSvgClick}
+                    onContextMenu={(e) => {e.preventDefault()}}
+                    className='svg-drawing' 
+                    viewBox={`${0} ${0} ${maxCoordX} ${maxCoordY}`}
+                    width={maxCoordX*zoom}
+                    height={maxCoordY*zoom}
+                    onMouseDown={handleDrag}
+                    onTouchStart={handleDrag}
+                    strokeWidth={2} stroke='black'
+                    tabIndex={0}>
                     {children}
                 </svg>
             </div>

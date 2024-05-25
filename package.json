@@ -1,6 +1,6 @@
 {
     "name": "family-test",
-    "homepage": "https://4lexDel.github.io/family-tree-editor",
+    "homepage": "/family-tree-editor",
     "version": "0.1.0",
     "private": true,
     "dependencies": {

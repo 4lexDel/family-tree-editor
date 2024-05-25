@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <title>SVG - responsive</title>
+    <style>
+        html,
+        body {
+            /* position: absolute; */
+            margin: 0px;
+            padding: 0px;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: rgb(224, 224, 224);
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            flex: 1;
+            margin: 20px;
+            background-image: url(https://t4.ftcdn.net/jpg/04/35/97/07/360_F_435970749_e7XTstmySOZhGDXNllmaBQFsB4o450wZ.jpg);
+            overflow: auto;
+        }
+        
+        svg {
+            padding: 0px;
+            margin: 20px;
+            cursor: move;
+        }
+        
+        .controls {
+            width: 100%;
+            padding-block: 5px;
+            margin: 10px;
+            display: flex;
+            column-gap: 50px;
+            justify-content: start;
+        }
+        
+        .controls * {
+            /* flex: 1; */
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="controls">
+        <button id="zoom-plus">+</button>
+        <button id="zoom-minus">-</button>
+    </div>
+    <div class="container">
+        <svg id="mySvg" viewBox="0 0 2050 1440">
+            <rect x="1" y="1" width="40" height="20" fill="red"></rect>
+            <rect x="42" y="1" width="40" height="20" fill="blue"></rect>
+    
+            <rect x="83" y="22" width="40" height="20" fill="green"></rect>
+            <rect x="124" y="22" width="40" height="20" fill="purple"></rect>
+    
+            <rect x="165" y="64" width="40" height="80" fill="black"></rect>
+        </svg>
+    </div>
+
+    <script>
+        const container = document.querySelector('.container');
+        const svg = document.getElementById('mySvg');
+
+        let startX, startY;
+        let startViewBox = svg.viewBox.baseVal;
+
+        let dragingCount = -1;
+        let dragCoeff = 2;
+
+        let zoom = 5;
+
+        const zoomPlusButton = document.getElementById("zoom-plus");
+        const zoomMinusButton = document.getElementById("zoom-minus");
+
+        const initSvg = () => {
+            startViewBox.width = 205; //svg.clientWidth / zoom;
+            startViewBox.height = 144; //svg.clientHeight / zoom;
+
+            svg.style["width"] = startViewBox.width * zoom;
+            svg.style["height"] = startViewBox.height * zoom;
+        }
+
+        initSvg();
+
+        zoomPlusButton.addEventListener('click', () => {
+            zoom += 1;
+            initSvg();
+        });
+
+        zoomMinusButton.addEventListener('click', () => {
+            if (zoom - 1 > 0) {
+                zoom -= 1;
+                initSvg();
+            }
+        });
+
+        const getTouchPos = (event) => {
+            const touch = event.touches[0];
+            return {
+                x: touch.clientX,
+                y: touch.clientY
+            };
+        }
+
+        window.addEventListener('resize', (event) => initSvg());
+
+        svg.addEventListener('mousedown', (event) => {
+            initSvg();
+
+            dragingCount = 0;
+            startX = event.clientX;
+            startY = event.clientY;
+        });
+
+        svg.addEventListener('touchstart', (event) => {
+            initSvg();
+
+            dragingCount = 0;
+            const pos = getTouchPos(event);
+            startX = pos.x;
+            startY = pos.y;
+        });
+
+        const onMove = (x, y) => {
+            if (dragingCount !== -1) {
+                dragingCount++;
+                if (dragingCount % 2 == 0) {
+                    startX = x;
+                    startY = y;
+                } else {
+                    const dx = dragCoeff * (x - startX);
+                    const dy = dragCoeff * (y - startY);
+
+                    container.scrollLeft = container.scrollLeft - dx;
+                    container.scrollTop = container.scrollTop - dy;
+                }
+            }
+        };
+
+        svg.addEventListener('mousemove', (event) => {
+            onMove(event.clientX, event.clientY);
+        });
+
+        svg.addEventListener('touchmove', (event) => {
+            const pos = getTouchPos(event);
+            onMove(pos.x, pos.y);
+        });
+
+        svg.addEventListener('mouseup', () => {
+            dragingCount = -1;
+        });
+
+        svg.addEventListener('mouseleave', () => {
+            dragingCount = -1;
+        });
+
+        svg.addEventListener('touchend', () => {
+            dragingCount = -1;
+        });
+
+        svg.addEventListener('touchcancel', () => {
+            dragingCount = -1;
+        });
+    </script>
+</body>
+
+</html>
